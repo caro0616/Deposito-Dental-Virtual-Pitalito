@@ -2,7 +2,7 @@
 
 ## Course Information
 - **Course:** Project 2  
-- **Professor:** Daniel Randon  
+- **Professor:** Daniel Rendon  
 - **University:** Universidad EAFIT  
 - **Class Schedule:** Wednesday, 6:00 AM – 9:00 AM  
 
