@@ -1,36 +1,22 @@
-# autosmg_concesionario
-
-## Course Information
-- **Course:** Project 2  
-- **Professor:** Daniel Rendon  
-- **University:** Universidad EAFIT  
-- **Class Schedule:** Wednesday, 6:00 AM – 9:00 AM  
 
 ## Team Members
 - **Leidy Carolina Obando Figueroa**
 - **Diego Eduardo Chourio Garcia**
 - **Juan Pablo Padilla Carvajal**
+- **Tomas Posada** 
+- **Sebastian Rave**
 
-## Project Overview
-This project consists of developing an **informative website** for the company **autosmg_concesionario**.  
-The main purpose of the website is to showcase the vehicles offered by the dealership in a clear, visual, and organized way.
+# Depósito Dental Virtual Pitalito
 
-The platform allows the company to:
-- Display available vehicles
-- Add vehicles with their respective prices
-- Upload and show vehicle images
-- Provide general information about the dealership and its products
+Plataforma web B2B para la compra autoservicio de insumos odontológicos, orientada a compras rápidas, repetitivas y técnicas.
 
-This website is designed primarily for **informational purposes**, helping customers explore the catalog before making contact or visiting the dealership.
+## Objetivo
+Digitalizar y escalar la operación comercial del depósito dental mediante un sistema web con catálogo, pedidos automatizados, seguimiento y chatbot inteligente.
 
-## Main Features
-- Vehicle catalog display
-- Vehicle details (model, price, images)
-- Simple and intuitive user interface
-- Informative content about the dealership
+## Público objetivo
+- Odontólogos
+- Clínicas odontológicas
+- Estudiantes de odontología
 
-## Technologies Used
-
-## Repository Structure
-
-## Notes
+## Diferenciador
+Chatbot semántico integrado para apoyo técnico y recompra rápida.
