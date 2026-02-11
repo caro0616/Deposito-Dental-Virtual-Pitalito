@@ -6,8 +6,8 @@ Este repositorio contiene el código fuente, configuración y documentación té
 
 ---
 
-## 📌 Estado del proyecto
-🚧 En desarrollo — MVP
+## Estado del proyecto
+ En desarrollo — MVP
 
 ---
 ### Instalación
