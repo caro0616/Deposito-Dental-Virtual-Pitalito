@@ -1,0 +1,41 @@
+<section class="cart">
+  <h1>Carrito de compras</h1>
+
+  <p *ngIf="!cart && !loading && !error">
+    El carrito se inicializará cuando se agreguen productos desde el catálogo.
+  </p>
+
+  <p *ngIf="error" class="cart__error">{{ error }}</p>
+
+  <div *ngIf="cart" class="cart__content">
+    <table class="cart__table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Precio</th>
+          <th>Cantidad</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of cart.items">
+          <td>{{ item.name }}</td>
+          <td>{{ item.unitPrice | currency: 'COP' }}</td>
+          <td>
+            <button (click)="changeQuantity(item, -1)" [disabled]="loading || item.quantity <= 1">
+              -
+            </button>
+            <span>{{ item.quantity }}</span>
+            <button (click)="changeQuantity(item, 1)" [disabled]="loading">+</button>
+          </td>
+          <td>{{ item.subtotal | currency: 'COP' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="cart__summary">
+      <span>Total:</span>
+      <strong>{{ cart.total | currency: 'COP' }}</strong>
+    </div>
+  </div>
+</section>

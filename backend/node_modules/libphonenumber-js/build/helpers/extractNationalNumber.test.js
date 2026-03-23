@@ -1,0 +1,27 @@
+"use strict";
+
+var _mocha = require("mocha");
+var _chai = require("chai");
+var _extractNationalNumber = _interopRequireDefault(require("./extractNationalNumber.js"));
+var _metadata = _interopRequireDefault(require("../metadata.js"));
+var _metadataMin = _interopRequireDefault(require("../../test/metadata/1.0.0/metadata.min.json"));
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { "default": e }; }
+(0, _mocha.describe)('extractNationalNumber', function () {
+  (0, _mocha.it)('should extract a national number when using old metadata (no `country` or `defaultCountry` specified)', function () {
+    var _oldMetadata = new _metadata["default"](_metadataMin["default"]);
+    _oldMetadata.selectNumberingPlan('RU');
+    (0, _chai.expect)((0, _extractNationalNumber["default"])('88005553535', undefined, _oldMetadata)).to.deep.equal({
+      nationalNumber: '8005553535',
+      carrierCode: undefined
+    });
+  });
+  (0, _mocha.it)('should extract a national number when using old metadata (`country` is specified)', function () {
+    var _oldMetadata = new _metadata["default"](_metadataMin["default"]);
+    _oldMetadata.selectNumberingPlan('RU');
+    (0, _chai.expect)((0, _extractNationalNumber["default"])('88005553535', 'RU', _oldMetadata)).to.deep.equal({
+      nationalNumber: '8005553535',
+      carrierCode: undefined
+    });
+  });
+});
+//# sourceMappingURL=extractNationalNumber.test.js.map
