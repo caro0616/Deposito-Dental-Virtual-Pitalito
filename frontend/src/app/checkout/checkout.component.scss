@@ -1,0 +1,17 @@
+.checkout {
+  padding: 2rem;
+
+  button {
+    margin-top: 1rem;
+  }
+
+  &__error {
+    margin-top: 1rem;
+    color: #b00020;
+  }
+
+  &__success {
+    margin-top: 1rem;
+    color: #2e7d32;
+  }
+}

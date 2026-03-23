@@ -1,0 +1,32 @@
+.cart {
+  padding: 2rem;
+
+  &__error {
+    color: #b00020;
+    margin-top: 1rem;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+
+    th,
+    td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid #ddd;
+    }
+
+    button {
+      margin: 0 0.25rem;
+    }
+  }
+
+  &__summary {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    font-size: 1.1rem;
+  }
+}

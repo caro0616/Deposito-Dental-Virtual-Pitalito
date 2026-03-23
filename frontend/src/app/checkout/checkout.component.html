@@ -1,0 +1,18 @@
+<section class="checkout">
+  <h1>Finalizar compra</h1>
+
+  <p>
+    Este flujo representa un checkout simplificado para el MVP: al hacer clic en el botón se genera
+    una orden a partir del carrito del usuario.
+  </p>
+
+  <button (click)="finalizeOrder()" [disabled]="loading">
+    {{ loading ? 'Procesando...' : 'Confirmar compra' }}
+  </button>
+
+  <p *ngIf="error" class="checkout__error">{{ error }}</p>
+
+  <p *ngIf="lastOrderId" class="checkout__success">
+    Orden creada correctamente. ID: <strong>{{ lastOrderId }}</strong>
+  </p>
+</section>

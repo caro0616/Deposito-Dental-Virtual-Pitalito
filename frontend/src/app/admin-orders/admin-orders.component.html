@@ -1,0 +1,40 @@
+<section class="admin-orders">
+  <h1>Gestión de órdenes</h1>
+
+  <p *ngIf="error" class="admin-orders__error">{{ error }}</p>
+
+  <table *ngIf="orders.length" class="admin-orders__table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>Total</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let order of orders">
+        <td>{{ order.id }}</td>
+        <td>{{ order.userId }}</td>
+        <td>{{ order.total | currency: 'COP' }}</td>
+        <td>{{ order.status }}</td>
+        <td>
+          <select
+            [value]="order.status"
+            (change)="onStatusChange(order, $event)"
+            [disabled]="loading"
+          >
+            <option value="pending">Pendiente</option>
+            <option value="paid">Pagado</option>
+            <option value="shipped">Enviado</option>
+            <option value="delivered">Entregado</option>
+            <option value="cancelled">Cancelado</option>
+          </select>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="!orders.length && !error">No hay órdenes registradas todavía.</p>
+</section>
