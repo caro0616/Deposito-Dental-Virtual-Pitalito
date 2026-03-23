@@ -21,7 +21,7 @@ jobs:
           cache-dependency-path: backend/package-lock.json
       - run: npm install
       - run: npm run lint
-      - run: npm run build || npm run dev -- --help
+      - run: npm run build
 
   frontend:
     runs-on: ubuntu-latest
