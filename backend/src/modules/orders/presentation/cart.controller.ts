@@ -10,15 +10,8 @@ export class CartController {
   private readonly demoUserId = 'demo-user';
 
   @Patch('items/:itemId')
-  async updateItemQuantity(
-    @Param('itemId') itemId: string,
-    @Body() body: UpdateCartItemDto,
-  ) {
-    const cart = await this.cartService.updateItemQuantity(
-      this.demoUserId,
-      itemId,
-      body.quantity,
-    );
+  async updateItemQuantity(@Param('itemId') itemId: string, @Body() body: UpdateCartItemDto) {
+    const cart = await this.cartService.updateItemQuantity(this.demoUserId, itemId, body.quantity);
 
     return {
       id: cart.id,

@@ -6,7 +6,7 @@
     "start": "ts-node src/main.ts",
     "dev": "ts-node-dev --respawn --transpile-only src/main.ts",
     "build": "tsc -p tsconfig.json",
-    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint": "node ./node_modules/eslint/bin/eslint.js \"src/**/*.{ts,tsx}\"",
     "format": "prettier --write \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
