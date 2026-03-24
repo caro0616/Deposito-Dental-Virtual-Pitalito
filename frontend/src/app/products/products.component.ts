@@ -18,6 +18,7 @@ interface Product {
     | 'radiologia'
     | 'esterilizacion';
   stock: number;
+  invimaRegistrationCode: string;
 }
 
 @Component({
@@ -45,7 +46,12 @@ export class ProductsComponent implements OnInit {
         this.products = data;
         this.filteredProducts = data;
       },
-      error: (err) => console.error('Error loading products:', err),
+      error: (err) => {
+        console.error('Error loading products:', err);
+        alert(
+          'Error al cargar productos. Verifica que el backend esté ejecutándose en http://localhost:3000',
+        );
+      },
     });
   }
 
