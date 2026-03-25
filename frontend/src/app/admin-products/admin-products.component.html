@@ -1,30 +1,99 @@
 <section class="admin-products">
-  <h1>Gestión de productos</h1>
+  <div class="admin-products__header">
+    <h1>Gestión de Productos</h1>
+    <button class="btn btn--primary" (click)="openCreateForm()" *ngIf="!showForm">
+      + Nuevo Producto
+    </button>
+  </div>
 
   <p *ngIf="error" class="admin-products__error">{{ error }}</p>
 
-  <table *ngIf="products.length" class="admin-products__table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Nombre</th>
-        <th>Precio</th>
-        <th>Categoría</th>
-        <th>Stock</th>
-        <th>Registro INVIMA</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let product of products">
-        <td>{{ product.id }}</td>
-        <td>{{ product.name }}</td>
-        <td>{{ product.price | currency: 'COP' }}</td>
-        <td>{{ getCategoryName(product.category) }}</td>
-        <td>{{ product.stock }}</td>
-        <td>{{ product.invimaRegistrationCode }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <!-- Form -->
+  <div *ngIf="showForm" class="admin-products__form">
+    <h2>{{ editingId ? 'Editar' : 'Crear' }} Producto</h2>
 
-  <p *ngIf="!products.length && !error">No hay productos registrados todavía.</p>
+    <div class="form-group">
+      <label for="name">Nombre</label>
+      <input id="name" type="text" [(ngModel)]="form.name" placeholder="Nombre del producto" />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Descripción</label>
+      <textarea id="description" [(ngModel)]="form.description" placeholder="Descripción del producto" rows="3"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="price">Precio (COP)</label>
+        <input id="price" type="number" [(ngModel)]="form.price" min="0" />
+      </div>
+      <div class="form-group">
+        <label for="stock">Stock</label>
+        <input id="stock" type="number" [(ngModel)]="form.stock" min="0" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="category">Categoría</label>
+      <input id="category" type="text" [(ngModel)]="form.category" placeholder="Ej: Instrumental, Resinas" />
+    </div>
+
+    <div class="form-group">
+      <label for="imageUrl">URL de Imagen</label>
+      <input id="imageUrl" type="text" [(ngModel)]="form.imageUrl" placeholder="https://..." />
+    </div>
+
+    <div class="form-group form-group--checkbox">
+      <label>
+        <input type="checkbox" [(ngModel)]="form.active" />
+        Producto activo (visible en catálogo)
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn--primary" (click)="saveProduct()" [disabled]="loading">
+        {{ editingId ? 'Guardar cambios' : 'Crear producto' }}
+      </button>
+      <button class="btn btn--secondary" (click)="cancelForm()">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!showForm" class="admin-products__table-wrapper">
+    <p *ngIf="loading" class="admin-products__loading">Cargando...</p>
+
+    <table *ngIf="!loading && products.length > 0" class="admin-products__table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Categoría</th>
+          <th>Precio</th>
+          <th>Stock</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of products">
+          <td>{{ product.name }}</td>
+          <td>{{ product.category }}</td>
+          <td>{{ product.price | currency: 'COP':'symbol-narrow':'1.0-0' }}</td>
+          <td>{{ product.stock }}</td>
+          <td>
+            <span class="badge" [class.badge--active]="product.active" [class.badge--inactive]="!product.active">
+              {{ product.active ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td class="actions">
+            <button class="btn btn--small" (click)="openEditForm(product)">Editar</button>
+            <button class="btn btn--small btn--danger" (click)="deleteProduct(product.id)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="!loading && products.length === 0" class="admin-products__empty">
+      No hay productos registrados. Crea el primero.
+    </p>
+  </div>
 </section>

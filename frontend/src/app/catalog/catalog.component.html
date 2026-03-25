@@ -1,40 +1,52 @@
-<div class="catalog-container">
-  <h1>Catálogo de Productos Dentales</h1>
+<section class="catalog">
+  <h1>Catálogo de Productos</h1>
 
-  <div class="filters">
-    <input
-      type="text"
-      [(ngModel)]="searchQuery"
-      (input)="onSearch()"
-      placeholder="Buscar productos..."
-      class="search-input"
-    />
+  <div *ngIf="loading" class="catalog__loading">Cargando productos...</div>
+  <p *ngIf="error" class="catalog__error">{{ error }}</p>
 
-    <select [(ngModel)]="selectedCategory" (change)="onFilterCategory()" class="category-select">
-      <option value="">Todas las categorías</option>
-      <option value="odontologia_general">Odontología General</option>
-      <option value="endodoncia">Endodoncia</option>
-      <option value="ortodoncia">Ortodoncia</option>
-      <option value="periodoncia">Periodoncia</option>
-      <option value="cirugia_oral">Cirugía Oral</option>
-      <option value="protesis">Prótesis</option>
-      <option value="radiologia">Radiología</option>
-      <option value="esterilizacion">Esterilización</option>
-    </select>
+  <div *ngIf="!loading && !error" class="catalog__content">
+    <div class="catalog__filters">
+      <button
+        [class.active]="selectedCategory === ''"
+        (click)="filterByCategory('')"
+      >
+        Todos
+      </button>
+      <button
+        *ngFor="let cat of categories"
+        [class.active]="selectedCategory === cat"
+        (click)="filterByCategory(cat)"
+      >
+        {{ cat }}
+      </button>
+    </div>
 
-    <button (click)="clearFilters()" class="clear-btn">Limpiar filtros</button>
-  </div>
+    <p *ngIf="filteredProducts.length === 0" class="catalog__empty">
+      No hay productos disponibles.
+    </p>
 
-  <div class="products-grid">
-    <div *ngFor="let product of filteredProducts" class="product-card">
-      <h3>{{ product.name }}</h3>
-      <p>{{ product.description }}</p>
-      <p class="price">${{ product.price.toFixed(2) }}</p>
-      <p class="category">Categoría: {{ getCategoryName(product.category) }}</p>
-      <p class="stock">Stock: {{ product.stock }}</p>
-      <p class="invima">Registro INVIMA: {{ product.invimaRegistrationCode }}</p>
+    <div class="catalog__grid">
+      <div *ngFor="let product of filteredProducts" class="catalog__card">
+        <img
+          [src]="product.imageUrl"
+          [alt]="product.name"
+          class="catalog__card-img"
+        />
+        <div class="catalog__card-body">
+          <span class="catalog__card-category">{{ product.category }}</span>
+          <h3 class="catalog__card-title">{{ product.name }}</h3>
+          <p class="catalog__card-desc">{{ product.description }}</p>
+          <div class="catalog__card-footer">
+            <strong>{{ product.price | currency: 'COP':'symbol-narrow':'1.0-0' }}</strong>
+            <span class="catalog__card-stock" *ngIf="product.stock > 0">
+              {{ product.stock }} disponibles
+            </span>
+            <span class="catalog__card-stock catalog__card-stock--out" *ngIf="product.stock === 0">
+              Agotado
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-
-  <p *ngIf="filteredProducts.length === 0" class="no-results">No se encontraron productos.</p>
-</div>
+</section>
