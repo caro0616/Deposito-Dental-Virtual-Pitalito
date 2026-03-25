@@ -1,4 +1,4 @@
-# Depósito Dental Virtual Pitalito
+# Depósito Dental Virtual Pitalito Huila
 
 Repositorio del proyecto **Depósito Dental Virtual Pitalito**, una plataforma web B2B para la gestión y compra autoservicio de insumos odontológicos.
 
