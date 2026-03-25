@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { RouterLink } from '@angular/router';
 
 interface Product {
   id: string;
@@ -10,12 +11,14 @@ interface Product {
   imageUrl: string;
   category: string;
   stock: number;
+  technicalSpecs?: Record<string, string>; 
+  invimaRegistry: string;
 }
 
 @Component({
   selector: 'app-catalog',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './catalog.component.html',
   styleUrls: ['./catalog.component.scss'],
 })
@@ -60,5 +63,20 @@ export class CatalogComponent implements OnInit {
     } else {
       this.filteredProducts = this.products.filter((p) => p.category === category);
     }
+  }
+
+ addToCart(product: Product, event: Event): void {
+  event.stopPropagation();
+
+  this.http.post(`${this.apiUrl}/cart/items`, {
+    productId: product.id,
+    quantity: 1,
+  }).subscribe({
+    next: () => {
+      sessionStorage.setItem('cartUpdated', 'true');
+      alert('Producto agregado al carrito');
+    },
+    error: () => alert('Error al agregar al carrito'),
+  });
   }
 }

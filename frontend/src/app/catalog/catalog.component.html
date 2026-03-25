@@ -26,7 +26,11 @@
     </p>
 
     <div class="catalog__grid">
-      <div *ngFor="let product of filteredProducts" class="catalog__card">
+      <div 
+        *ngFor="let product of filteredProducts" 
+        class="catalog__card"
+        [routerLink]="['/products', product.id]"
+      >
         <img
           [src]="product.imageUrl"
           [alt]="product.name"
@@ -35,7 +39,21 @@
         <div class="catalog__card-body">
           <span class="catalog__card-category">{{ product.category }}</span>
           <h3 class="catalog__card-title">{{ product.name }}</h3>
+          
+          <p class="catalog__card-invima">
+            Registro INVIMA: {{ product.invimaRegistry }}
+          </p>
+
           <p class="catalog__card-desc">{{ product.description }}</p>
+          
+          <button
+            class="catalog__add-btn"
+            (click)="addToCart(product, $event)"
+            [disabled]="product.stock === 0"
+          >
+            {{ product.stock === 0 ? 'Sin stock' : 'Agregar al carrito' }}
+          </button>
+
           <div class="catalog__card-footer">
             <strong>{{ product.price | currency: 'COP':'symbol-narrow':'1.0-0' }}</strong>
             <span class="catalog__card-stock" *ngIf="product.stock > 0">

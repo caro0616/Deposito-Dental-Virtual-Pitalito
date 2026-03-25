@@ -35,8 +35,29 @@ export class CartComponent implements OnInit {
   constructor(private readonly http: HttpClient) {}
 
   ngOnInit(): void {
-    // In a real app we would have an endpoint to fetch the cart
-    // For now we assume it will be pre-populated on the backend side
+
+  this.loadCart();
+  const updated = sessionStorage.getItem('cartUpdated');
+
+  if (updated === 'true') {
+    this.loadCart(); 
+    sessionStorage.removeItem('cartUpdated'); 
+  }
+}
+
+  loadCart(): void {
+    this.loading = true;
+    this.error = null;
+    this.http.get<CartResponse>(`${this.apiUrl}/cart`).subscribe({
+      next: (cart) => {
+        this.cart = cart;
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Error al cargar el carrito';
+        this.loading = false;
+      },
+    });
   }
 
   changeQuantity(item: CartItem, delta: number): void {
@@ -53,9 +74,8 @@ export class CartComponent implements OnInit {
         quantity: nextQuantity,
       })
       .subscribe({
-        next: (cart: CartResponse) => {
-          this.cart = cart;
-          this.loading = false;
+        next: () => {
+          this.loadCart();
         },
         error: (err: unknown) => {
           const message = err instanceof Error ? err.message : 'Error updating quantity';

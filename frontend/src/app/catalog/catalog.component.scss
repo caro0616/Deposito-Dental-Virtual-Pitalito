@@ -87,6 +87,11 @@
       text-transform: uppercase;
       color: #3498db;
       font-weight: 600;
+    } 
+
+     .catalog__card-invima {
+     font-size: 0.75rem;
+     color: #7f8c8d;
     }
 
     &-title {
@@ -111,6 +116,7 @@
         color: #27ae60;
       }
     }
+    
 
     &-stock {
       font-size: 0.8rem;

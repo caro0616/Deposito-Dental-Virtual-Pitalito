@@ -1,0 +1,53 @@
+.detail {
+  max-width: 1000px;
+  margin: 2rem auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+
+  img {
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  &__category {
+    color: #3498db;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+  }
+
+  h1 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+  }
+
+  &__price {
+    font-size: 1.5rem;
+    color: #27ae60;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    margin-top: 1.5rem;
+    color: #2c3e50;
+  }
+
+  &__specs {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+
+    td {
+      padding: 0.5rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .key {
+      font-weight: 600;
+      width: 40%;
+      color: #34495e;
+    }
+  }
+}

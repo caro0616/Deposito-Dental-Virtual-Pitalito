@@ -1,0 +1,35 @@
+<section *ngIf="product" class="detail">
+  <img [src]="product.imageUrl" [alt]="product.name" />
+
+  <div class="detail__info">
+    <span class="detail__category">{{ product.category }}</span>
+    <h1>{{ product.name }}</h1>
+
+    <p class="detail__price">
+      {{ product.price | currency:'COP':'symbol-narrow':'1.0-0' }}
+    </p>
+
+    <p class="detail__invima">
+      <strong>Registro INVIMA:</strong> {{ product.invimaRegistry }}
+    </p>
+
+    <button
+      class="detail__add-btn"
+      (click)="addToCart()"
+      [disabled]="product.stock === 0"
+    >
+      {{ product.stock === 0 ? 'Agotado' : 'Agregar al carrito' }}
+    </button>
+
+    <h3>Descripción</h3>
+    <p>{{ product.description }}</p>
+
+    <h3 *ngIf="specEntries().length">Ficha técnica</h3>
+    <table *ngIf="specEntries().length" class="detail__specs">
+      <tr *ngFor="let spec of specEntries()">
+        <td class="key">{{ spec.key }}</td>
+        <td>{{ spec.value }}</td>
+      </tr>
+    </table>
+  </div>
+</section>
