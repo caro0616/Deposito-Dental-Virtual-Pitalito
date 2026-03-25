@@ -1,0 +1,30 @@
+<section class="admin-products">
+  <h1>Gestión de productos</h1>
+
+  <p *ngIf="error" class="admin-products__error">{{ error }}</p>
+
+  <table *ngIf="products.length" class="admin-products__table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Precio</th>
+        <th>Categoría</th>
+        <th>Stock</th>
+        <th>Registro INVIMA</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let product of products">
+        <td>{{ product.id }}</td>
+        <td>{{ product.name }}</td>
+        <td>{{ product.price | currency: 'COP' }}</td>
+        <td>{{ getCategoryName(product.category) }}</td>
+        <td>{{ product.stock }}</td>
+        <td>{{ product.invimaRegistrationCode }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="!products.length && !error">No hay productos registrados todavía.</p>
+</section>

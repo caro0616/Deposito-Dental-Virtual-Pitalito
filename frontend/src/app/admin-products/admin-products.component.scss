@@ -1,0 +1,19 @@
+.admin-products {
+  padding: 2rem;
+
+  &__error {
+    color: #b00020;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+
+    th,
+    td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid #ddd;
+    }
+  }
+}

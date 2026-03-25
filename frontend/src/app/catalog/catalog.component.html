@@ -1,0 +1,40 @@
+<div class="catalog-container">
+  <h1>Catálogo de Productos Dentales</h1>
+
+  <div class="filters">
+    <input
+      type="text"
+      [(ngModel)]="searchQuery"
+      (input)="onSearch()"
+      placeholder="Buscar productos..."
+      class="search-input"
+    />
+
+    <select [(ngModel)]="selectedCategory" (change)="onFilterCategory()" class="category-select">
+      <option value="">Todas las categorías</option>
+      <option value="odontologia_general">Odontología General</option>
+      <option value="endodoncia">Endodoncia</option>
+      <option value="ortodoncia">Ortodoncia</option>
+      <option value="periodoncia">Periodoncia</option>
+      <option value="cirugia_oral">Cirugía Oral</option>
+      <option value="protesis">Prótesis</option>
+      <option value="radiologia">Radiología</option>
+      <option value="esterilizacion">Esterilización</option>
+    </select>
+
+    <button (click)="clearFilters()" class="clear-btn">Limpiar filtros</button>
+  </div>
+
+  <div class="products-grid">
+    <div *ngFor="let product of filteredProducts" class="product-card">
+      <h3>{{ product.name }}</h3>
+      <p>{{ product.description }}</p>
+      <p class="price">${{ product.price.toFixed(2) }}</p>
+      <p class="category">Categoría: {{ getCategoryName(product.category) }}</p>
+      <p class="stock">Stock: {{ product.stock }}</p>
+      <p class="invima">Registro INVIMA: {{ product.invimaRegistrationCode }}</p>
+    </div>
+  </div>
+
+  <p *ngIf="filteredProducts.length === 0" class="no-results">No se encontraron productos.</p>
+</div>
