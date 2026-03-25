@@ -19,6 +19,8 @@ export class ProductAdminService {
       dto.category,
       dto.stock,
       dto.active ?? true,
+      dto.technicalSpecs ?? {},
+      dto.invimaRegistry,
     );
     await this.productRepo.save(product);
     return product;
@@ -40,6 +42,15 @@ export class ProductAdminService {
     if (dto.imageUrl !== undefined) product.imageUrl = dto.imageUrl;
     if (dto.category !== undefined) product.category = dto.category;
     if (dto.stock !== undefined) product.updateStock(dto.stock);
+
+    if (dto.technicalSpecs !== undefined) {
+      product.technicalSpecs = dto.technicalSpecs;
+    }
+
+    if (dto.invimaRegistry !== undefined) {
+      product.invimaRegistry = dto.invimaRegistry;
+    }
+
     if (dto.active !== undefined) {
       if (dto.active) {
         product.activate();
