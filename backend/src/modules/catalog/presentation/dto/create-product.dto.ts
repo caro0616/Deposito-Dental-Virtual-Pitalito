@@ -1,4 +1,11 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, Min } from 'class-validator';
+import { 
+  IsString, 
+  IsNumber, 
+  IsOptional, 
+  IsBoolean, 
+  Min, 
+  IsObject 
+} from 'class-validator';
 
 export class CreateProductDto {
   @IsString()
@@ -24,4 +31,11 @@ export class CreateProductDto {
   @IsOptional()
   @IsBoolean()
   active?: boolean;
+
+  @IsOptional()
+  @IsObject()
+  technicalSpecs?: Record<string, string>; 
+
+  @IsString()
+  invimaRegistry!: string;
 }
