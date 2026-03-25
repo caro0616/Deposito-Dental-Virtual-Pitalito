@@ -1,13 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { Product } from '../domain/product.entity';
-import { ProductRepository } from '../infrastructure/product.repository';
+import { PRODUCT_REPOSITORY, IProductRepository } from '../infrastructure/product.repository';
 import { CreateProductDto } from '../presentation/dto/create-product.dto';
 import { UpdateProductDto } from '../presentation/dto/update-product.dto';
 import { randomUUID } from 'crypto';
 
 @Injectable()
 export class ProductAdminService {
-  constructor(private readonly productRepo: ProductRepository) {}
+  constructor(
+    @Inject(PRODUCT_REPOSITORY)
+    private readonly productRepo: IProductRepository,
+  ) {}
 
   async create(dto: CreateProductDto): Promise<Product> {
     const product = new Product(

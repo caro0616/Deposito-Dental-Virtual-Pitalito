@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { ICartRepository, CART_REPOSITORY } from '../infrastructure/cart.repository';
+import { Order, OrderStatus } from '../domain/order.entity';
+import { IOrderRepository, ORDER_REPOSITORY } from '../infrastructure/order.repository';
+
 // Lightweight uuid v4 generator compatible with CommonJS
 function uuidv4(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -7,15 +11,14 @@ function uuidv4(): string {
     return v.toString(16);
   });
 }
-import { CartRepository } from '../infrastructure/cart.repository';
-import { Order, OrderStatus } from '../domain/order.entity';
-import { OrderRepository } from '../infrastructure/order.repository';
 
 @Injectable()
 export class OrderService {
   constructor(
-    private readonly cartRepository: CartRepository,
-    private readonly orderRepository: OrderRepository,
+    @Inject(CART_REPOSITORY)
+    private readonly cartRepository: ICartRepository,
+    @Inject(ORDER_REPOSITORY)
+    private readonly orderRepository: IOrderRepository,
   ) {}
 
   async checkout(userId: string): Promise<Order> {
@@ -40,7 +43,7 @@ export class OrderService {
 
     await this.orderRepository.save(order);
 
-    // In a real implementation we would persist an emptied cart here
+    // Clear the cart after successful checkout
     cart.items = [];
     cart.total = 0;
     await this.cartRepository.save(cart);

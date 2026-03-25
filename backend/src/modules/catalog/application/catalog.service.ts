@@ -1,10 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { Product } from '../domain/product.entity';
-import { ProductRepository } from '../infrastructure/product.repository';
+import { PRODUCT_REPOSITORY, IProductRepository } from '../infrastructure/product.repository';
 
 @Injectable()
 export class CatalogService {
-  constructor(private readonly productRepo: ProductRepository) {}
+  constructor(
+    @Inject(PRODUCT_REPOSITORY)
+    private readonly productRepo: IProductRepository,
+  ) {}
 
   async getPublicCatalog(): Promise<Product[]> {
     return this.productRepo.findActive();

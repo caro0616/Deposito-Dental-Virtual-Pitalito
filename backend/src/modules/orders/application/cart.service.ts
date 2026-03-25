@@ -1,10 +1,13 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Cart } from '../domain/cart.entity';
-import { CartRepository } from '../infrastructure/cart.repository';
+import { ICartRepository, CART_REPOSITORY } from '../infrastructure/cart.repository';
 
 @Injectable()
 export class CartService {
-  constructor(private readonly cartRepository: CartRepository) {}
+  constructor(
+    @Inject(CART_REPOSITORY)
+    private readonly cartRepository: ICartRepository,
+  ) {}
 
   async getUserCart(userId: string): Promise<Cart> {
     const cart = await this.cartRepository.findByUserId(userId);
