@@ -36,8 +36,8 @@ export class NavbarComponent implements OnInit {
 
   constructor() {
     this.router.events
-      .pipe(filter(e => e instanceof NavigationEnd))
-      .subscribe((e: any) => {
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((e) => {
         this.isHomePage.set(e.urlAfterRedirects === '/' || e.urlAfterRedirects === '');
         this.catalogOpen.set(false);
         this.searchOpen.set(false);
