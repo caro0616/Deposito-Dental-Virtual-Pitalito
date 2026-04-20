@@ -1,34 +1,94 @@
-<!-- <div class="odontobot">
-  @if (bubbleVisible()) {
-    <div class="odontobot__bubble">
-      <button class="odontobot__bubble-close" (click)="closeBubble()">✕</button>
-      ¡Hola, soy <strong>OdontoBot</strong>, tu asistente virtual!
-    </div>
-  }
-  <button class="odontobot__btn" (click)="toggle()" title="OdontoBot">
-    <div class="odontobot__avatar">
-      <svg width="32" height="32" viewBox="0 0 50 50" fill="none">
-        <circle cx="25" cy="25" r="25" fill="#00AEEF"/>
-        <circle cx="25" cy="20" r="9" fill="white"/>
-        <path d="M10 43c0-8.3 6.7-15 15-15s15 6.7 15 15" fill="white"/>
-        <circle cx="22" cy="19" r="2" fill="#00AEEF"/>
-        <circle cx="28" cy="19" r="2" fill="#00AEEF"/>
-        <path d="M22 23.5c0 0 1.5 2 3 0" stroke="#00AEEF" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-      </svg>
-    </div>
-  </button>
+<div class="odontobot-float">
+
+  <button class="odontobot-fab" (click)="toggle()">🤖</button>
 
   @if (open()) {
-    <div class="odontobot__panel">
-      <div class="odontobot__panel-header">
-        <strong>OdontoBot</strong>
-        <span>Asistente Virtual</span>
-        <button (click)="toggle()">✕</button>
-      </div>
-      <div class="odontobot__panel-body">
-        <p>¡Hola! Soy tu asistente virtual. Puedo ayudarte a encontrar el producto ideal para tu consultorio.</p>
-        <p class="odontobot__hint">¿Qué tipo de procedimiento necesitas realizar?</p>
-      </div>
+    <div class="odontobot-panel">
+      @if (!auth.isLoggedIn()) {
+        <div class="odontobot-messages" #scrollMe>
+          <div class="odontobot-msg odontobot-msg--bot">
+            <span class="odontobot-avatar"></span>
+            <div class="odontobot-bubble">
+              Debes iniciar sesión para usar OdontoBot.
+            </div>
+          </div>
+        </div>
+      } @else {
+        <!-- HEADER -->
+        <div class="odontobot-header">
+          <div class="odontobot-header-left">
+            <div class="odontobot-avatar"></div>
+            <div>
+              <span>OdontoBot</span><br>
+              <small>🟢 en línea</small>
+            </div>
+          </div>
+          <div>
+            <label>
+              <input type="file" (change)="onFileSelected($event)" hidden />
+              📎
+            </label>
+            <button (click)="toggle()">➖</button>
+          </div>
+        </div>
+        <!-- MENSAJES -->
+        <div class="odontobot-messages" #scrollMe>
+          @for (msg of messages(); track msg) {
+            <div [ngClass]="['odontobot-msg', 'odontobot-msg--' + msg.from]">
+              @if (msg.from === 'bot') {
+                <span class="odontobot-avatar"></span>
+              }
+              <div class="odontobot-bubble">
+                {{ msg.text }}
+                @if (msg.options) {
+                  <div class="odontobot-options">
+                    @for (opt of msg.options; track opt) {
+                      <button 
+                        class="odontobot-chip" 
+                        (click)="handleOption(opt)"
+                      >
+                        {{ opt }}
+                      </button>
+                    }
+                  </div>
+                }
+                @if (msg.file) {
+                  <div class="odontobot-file">
+                    📎 {{ msg.file.name }}
+                  </div>
+                }
+              </div>
+            </div>
+          }
+          @if (typing()) {
+            <div class="odontobot-msg odontobot-msg--bot">
+              <span class="odontobot-avatar"></span>
+              <div class="odontobot-bubble">
+                escribiendo...
+              </div>
+            </div>
+          }
+        </div>
+        <!-- PREVIEW -->
+        @if (selectedFile()) {
+          <div class="file-preview">
+            📎 {{ selectedFile()?.name }}
+          </div>
+        }
+        <!-- INPUT -->
+        <form (submit)="$event.preventDefault(); sendMessage();" class="odontobot-input-bar">
+          <input
+            #txt
+            type="text"
+            [value]="input()"
+            (input)="input.set(txt.value || '')"
+            placeholder="Escribe tu mensaje..."
+            class="odontobot-input"
+          />
+          <button type="submit">➤</button>
+        </form>
+      }
     </div>
   }
-</div> -->
+
+</div>

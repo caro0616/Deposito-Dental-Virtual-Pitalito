@@ -1,6 +1,58 @@
+/* 🔥 SIEMPRE ARRIBA DE TODO */
 @use '../../../styles/variables' as v;
 @use '../../../styles/mixins' as m;
 
+/* ── GRID 3x3 ───────────────────────── */
+.catalog-grid.grid-3x3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: v.$sp-6;
+  margin-bottom: v.$sp-6;
+}
+
+@media (max-width: 900px) {
+  .catalog-grid.grid-3x3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .catalog-grid.grid-3x3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── PAGINACIÓN ─────────────────────── */
+.catalog-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 2rem 0 1.5rem 0;
+}
+
+.catalog-pagination__btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:disabled {
+    background: #cbd5e1;
+    color: #64748b;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    background: #1e40af;
+  }
+}
+
+/* ── PAGE ───────────────────────────── */
 .catalog-page {
   padding: v.$sp-6 0 v.$sp-16;
 
@@ -36,10 +88,12 @@
     background: none;
     border: none;
     cursor: pointer;
+
     &:hover { text-decoration: underline; }
   }
 }
 
+/* ── LAYOUT ─────────────────────────── */
 .catalog-layout {
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -50,7 +104,7 @@
   @include m.md { grid-template-columns: 1fr; }
 }
 
-// ── FILTERS ───────────────────────────────────────────────
+/* ── FILTERS ────────────────────────── */
 .filters {
   background: v.$white;
   border: 1px solid v.$border-color;
@@ -116,7 +170,10 @@
     transition: all v.$tr-fast;
     background: v.$secondary-light;
 
-    &.filled { background: v.$primary; border-color: v.$primary; }
+    &.filled {
+      background: v.$primary;
+      border-color: v.$primary;
+    }
   }
 
   &__checkbox {
@@ -129,10 +186,14 @@
 
     input { display: none; }
 
-    &:hover .filters__check-box { border-color: v.$primary; }
+    &:hover .filters__check-box {
+      border-color: v.$primary;
+    }
+
     input:checked ~ .filters__check-box {
       background: v.$primary;
       border-color: v.$primary;
+
       &::after { opacity: 1; }
     }
   }
@@ -161,8 +222,10 @@
   }
 }
 
-// ── CATALOG GRID ──────────────────────────────────────────
-.catalog-results { min-height: 300px; }
+/* ── RESULTS ────────────────────────── */
+.catalog-results {
+  min-height: 300px;
+}
 
 .catalog-grid {
   display: grid;

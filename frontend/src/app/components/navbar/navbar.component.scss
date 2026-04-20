@@ -1,5 +1,115 @@
 @use '../../../styles/variables' as v;
 @use '../../../styles/mixins' as m;
+.notif-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  font-family: v.$font-heading;
+  z-index: 2;
+}
+.notif-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  font-family: v.$font-heading;
+  z-index: 2;
+}
+
+.notif-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  position: relative;
+  font-size: 15px;
+  line-height: 1.3;
+  background: #e0e7ff; /* azul claro por defecto */
+  transition: background 0.2s;
+
+  &--read {
+    background: #fff;
+    opacity: 1;
+  }
+
+  a, span {
+    flex: 1;
+    color: #222;
+    text-decoration: none;
+    cursor: pointer;
+    small { color: #666; font-size: 13px; }
+  }
+}
+
+.notif-x {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 20px;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.2s;
+  &:hover { color: #e11d48; }
+}
+
+
+// ── Notificaciones ─────────────────────────────────────────────
+.navbar__notif-modal {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  display: flex;
+  z-index: 300;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.01); // click-outside area
+  pointer-events: all;
+}
+
+.navbar__notif-modal-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-100%, 0); /* Sale hacia la izquierda de la campana */
+  min-width: 320px;
+  max-width: 90vw;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+  border: 1px solid #e5e7eb;
+  padding: 1.5rem 1.25rem 1.25rem 1.25rem;
+  margin-left: -16px;
+}
+
+.navbar__notif-close {
+  margin: 0.5rem auto 0 auto;
+  display: block;
+}
 
 .navbar {
   position: sticky;

@@ -94,10 +94,15 @@
             <p>No se encontraron productos con los filtros seleccionados.</p>
           </div>
         } @else {
-          <div class="catalog-grid">
-            @for (product of products(); track product.id) {
+          <div class="catalog-grid grid-3x3">
+            @for (product of pagedProducts(); track product.id) {
               <app-product-card [product]="product" />
             }
+          </div>
+          <div class="catalog-pagination">
+            <button class="catalog-pagination__btn" [disabled]="page() === 1" (click)="prevPage()">Anterior</button>
+            <span>Página {{ page() }} de {{ totalPages }}</span>
+            <button class="catalog-pagination__btn" [disabled]="page() === totalPages" (click)="nextPage()">Siguiente</button>
           </div>
         }
       </div>

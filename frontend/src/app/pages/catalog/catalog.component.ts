@@ -1,67 +1,48 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+
+
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { ProductCardComponent } from '../../components/product-card/product-card.component';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/product.model';
+import { ProductCardComponent } from '../../components/product-card/product-card.component';
+
 
 @Component({
   selector: 'app-catalog',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ProductCardComponent],
+  imports: [CommonModule, RouterModule, ProductCardComponent],
   templateUrl: './catalog.component.html',
-  styleUrl: './catalog.component.scss'
+  styleUrls: ['./catalog.component.scss']
 })
+
+
 export class CatalogComponent implements OnInit {
-  ps    = inject(ProductService);
-  route = inject(ActivatedRoute);
+  ps: ProductService = inject(ProductService);
+  route: ActivatedRoute = inject(ActivatedRoute);
+
 
   allProducts = signal<Product[]>([]);
-  loading = signal(true);
+  loading = signal<boolean>(true);
   searchQuery = signal<string | null>(null);
 
   selectedCategory  = signal<string | null>(null);
   selectedBrand     = signal<string | null>(null);
   selectedMaterials = signal<string[]>([]);
-  priceMax          = signal(600000);
+  priceMax          = signal<number>(600000);
   sortBy            = signal<string>('Más nuevo');
 
-  products = computed<Product[]>(() => {
-    let list = this.allProducts();
-    if (this.selectedCategory()) list = list.filter(p => p.category === this.selectedCategory());
-    if (this.selectedBrand())    list = list.filter(p => p.brand === this.selectedBrand());
-    if (this.selectedMaterials().length) list = list.filter(p => this.selectedMaterials().includes(p.materials));
-    list = list.filter(p => p.price <= this.priceMax());
-    return list;
-  });
 
-  pageTitle = computed(() => {
-    if (this.searchQuery()) return `Resultados para "${this.searchQuery()}"`;
-    const cat = this.selectedCategory();
-    return cat ? (this.ps.categoryLabels[cat] || cat) : 'Todos los Productos';
-  });
 
-  get categories() { return this.ps.categories; }
-  get brands()     { return this.ps.brands; }
-  get materials()  { return this.ps.materials; }
-
-  async ngOnInit() {
-    this.route.queryParams.subscribe(async p => {
-      this.selectedCategory.set(p['cat'] ?? null);
-      this.searchQuery.set(p['q'] ?? null);
-      await this.loadProducts();
-    });
-  }
 
   private async loadProducts() {
     this.loading.set(true);
     try {
       let products: Product[];
       if (this.searchQuery()) {
-        products = await this.ps.search(this.searchQuery()!);
+        products = await (this.ps.search(this.searchQuery()!) as Promise<Product[]>);
       } else {
-        products = await this.ps.loadCatalog();
+        products = await (this.ps.loadCatalog() as Promise<Product[]>);
       }
       this.allProducts.set(products);
     } catch (err) {
@@ -88,8 +69,12 @@ export class CatalogComponent implements OnInit {
     this.selectedBrand.update(v => v === brand ? null : brand);
   }
 
+
   categoryLabel(slug: string): string {
-    return this.ps.categoryLabels[slug] || slug;
+    return (this.ps.categoryLabels as Record<string, string>)[slug] || slug;
+  }
+  ngOnInit(): void {
+    this.loadProducts();
   }
 
   clearFilters() {
@@ -97,6 +82,30 @@ export class CatalogComponent implements OnInit {
     this.selectedBrand.set(null);
     this.selectedMaterials.set([]);
     this.priceMax.set(500000);
+  }
+  
+  // Propiedades para el template
+  get categories() { return this.ps.categories; }
+  get brands() { return this.ps.brands; }
+  get materials() { return this.ps.materials; }
+  get products() { return this.allProducts; }
+  
+  // Paginación
+  page = signal<number>(1);
+  pageSize = 9; // 3x3 grid
+  get totalPages() {
+    return Math.ceil(this.allProducts().length / this.pageSize) || 1;
+  }
+  pagedProducts() {
+    const start = (this.page() - 1) * this.pageSize;
+    return this.allProducts().slice(start, start + this.pageSize);
+  }
+  nextPage() { if (this.page() < this.totalPages) this.page.set(this.page() + 1); }
+  prevPage() { if (this.page() > 1) this.page.set(this.page() - 1); }
+  
+  // Título de la página
+  pageTitle() {
+    return this.selectedCategory() ? this.categoryLabel(this.selectedCategory()!) : 'Catálogo';
   }
 
   get breadcrumbs() {

@@ -1,3 +1,5 @@
+import { UsersModule } from '../users/users.module';
+import { MailService } from '../../shared/mail.service';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
@@ -26,6 +28,7 @@ import { CatalogModule } from '../catalog/catalog.module';
     ]),
     // CatalogModule exporta PRODUCT_REPOSITORY — necesario en CartService y OrderService
     CatalogModule,
+    UsersModule,
   ],
   controllers: [CartController, OrdersController],
   providers: [
@@ -39,6 +42,7 @@ import { CatalogModule } from '../catalog/catalog.module';
       provide: ORDER_REPOSITORY,
       useClass: MongooseOrderRepository,
     },
+    MailService,
   ],
 })
 export class OrdersModule {}

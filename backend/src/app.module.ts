@@ -1,3 +1,4 @@
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -47,6 +48,7 @@ import databaseConfig, { DatabaseConfig } from './config/database.config';
     AuthModule, // US-09: autenticación local + Google OAuth
     CatalogModule, // US-01 a US-06, US-22, US-23
     OrdersModule, // US-07, US-08, US-10, US-24
+    NotificationsModule,
   ],
 })
 export class AppModule {}

@@ -1,97 +1,316 @@
-@use '../../../styles/variables' as v;
-
-.odontobot {
+.odontobot-float {
   position: fixed;
-  bottom: v.$sp-6;
-  right: v.$sp-6;
-  z-index: 90;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: v.$sp-2;
+  bottom: 20px;
+  right: 20px;
+  z-index: 100;
+}
 
-  &__bubble {
-    background: v.$white;
-    border: 1px solid v.$border-color;
-    border-radius: v.$radius-xl v.$radius-xl 0 v.$radius-xl;
-    padding: v.$sp-3 v.$sp-4;
-    font-size: v.$text-sm;
-    color: v.$secondary;
-    box-shadow: v.$shadow-md;
-    max-width: 220px;
-    position: relative;
-    animation: fadeIn 0.3s ease;
+/* BOTÓN */
+.odontobot-fab {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #00AEEF;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  transition: 0.2s;
 
-    strong { color: v.$primary; }
-
-    &-close {
-      position: absolute;
-      top: v.$sp-1;
-      right: v.$sp-2;
-      font-size: v.$text-xs;
-      color: v.$secondary-light;
-      background: none;
-      border: none;
-      cursor: pointer;
-      line-height: 1;
-    }
-  }
-
-  &__btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-  }
-
-  &__avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    overflow: hidden;
-    box-shadow: v.$shadow-lg;
-    transition: transform 0.2s ease;
-
-    &:hover { transform: scale(1.08); }
-  }
-
-  &__panel {
-    position: absolute;
-    bottom: 70px;
-    right: 0;
-    width: 280px;
-    background: v.$white;
-    border-radius: v.$radius-xl;
-    box-shadow: v.$shadow-xl;
-    overflow: hidden;
-    animation: slideUp 0.25s ease;
-
-    &-header {
-      background: v.$primary;
-      color: v.$white;
-      padding: v.$sp-3 v.$sp-4;
-      display: flex;
-      align-items: center;
-      gap: v.$sp-2;
-
-      strong { font-size: v.$text-base; }
-      span { font-size: v.$text-xs; opacity: 0.8; flex: 1; }
-      button { background: none; border: none; color: white; cursor: pointer; opacity: 0.7; &:hover { opacity: 1; } }
-    }
-
-    &-body {
-      padding: v.$sp-4;
-      p { font-size: v.$text-sm; color: v.$secondary-mid; margin-bottom: v.$sp-3; }
-    }
-  }
-
-  &__hint {
-    font-weight: v.$fw-semibold !important;
-    color: v.$secondary !important;
+  &:hover {
+    transform: scale(1.1);
   }
 }
 
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+/* PANEL */
+.odontobot-panel {
+  width: 340px;
+  height: 520px;
+  margin-top: 12px;
 
-$v-fw-semibold: 600;
+  background: #ffffff;
+  border-radius: 20px;
+
+  border: 1px solid #e5e7eb;
+
+  box-shadow: 
+    0 20px 40px rgba(0,0,0,0.15),
+    0 5px 15px rgba(0,174,239,0.15);
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  animation: slideUp 0.25s ease;
+}
+
+/* HEADER */
+.odontobot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 12px 16px;
+  background: #00AEEF;
+  color: white;
+  font-weight: 600;
+}
+
+.odontobot-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.odontobot-header-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+}
+
+.odontobot-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.odontobot-header-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+
+  width: 28px;
+  height: 28px;
+
+  border-radius: 6px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: rgba(255,255,255,0.2);
+  }
+}
+
+/* ONLINE STATUS */
+.online-dot {
+  width: 6px;
+  height: 6px;
+  background: #22c55e;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+/* MENSAJES */
+.odontobot-messages {
+  flex: 1;
+  padding: 16px;
+  background: #f8fafc;
+  overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  scrollbar-width: thin;
+  scrollbar-color: #00AEEF #f1f5f9;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #00AEEF55;
+    border-radius: 4px;
+  }
+}
+
+/* MENSAJE */
+.odontobot-msg {
+  display: flex;
+}
+
+.odontobot-msg--user {
+  justify-content: flex-end;
+}
+
+.odontobot-msg--bot {
+  justify-content: flex-start;
+}
+
+/* AVATAR */
+.odontobot-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #00AEEF;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+/* BURBUJA */
+.odontobot-bubble {
+  padding: 10px 14px;
+  border-radius: 16px;
+  max-width: 75%;
+  font-size: 14px;
+  line-height: 1.4;
+
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+
+  animation: fadeIn 0.2s ease;
+}
+
+/* BOT */
+.odontobot-msg--bot .odontobot-bubble {
+  background: #e6f7ff;
+  color: #003b4a;
+  border-bottom-left-radius: 4px;
+}
+
+/* USER */
+.odontobot-msg--user .odontobot-bubble {
+  background: #00AEEF;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+/* OPCIONES */
+.odontobot-options {
+  margin-top: 8px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.odontobot-chip {
+  background: white;
+  border: 1px solid #00AEEF;
+  color: #00AEEF;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+
+  &:hover {
+    background: #00AEEF;
+    color: white;
+  }
+}
+
+/* PREVIEW ARCHIVO */
+.file-preview {
+  background: #f1f5f9;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* INPUT */
+.odontobot-input-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+
+  background: white;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* INPUT TEXTO */
+.odontobot-input {
+  flex: 1;
+  border: none;
+  background: #f1f5f9;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-size: 14px;
+  outline: none;
+
+  transition: box-shadow 0.2s;
+
+  &:focus {
+    box-shadow: 0 0 0 2px #00AEEF33;
+  }
+}
+
+/* BOTÓN ENVIAR */
+.odontobot-send {
+  background: #00AEEF;
+  border: none;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  color: white;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: 0.2s;
+
+  &:hover {
+    background: #007fa3;
+  }
+
+  &:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+  }
+}
+
+/* ARCHIVO MENSAJE */
+.odontobot-file {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #007fa3;
+}
+
+/* TYPING BURBUJA */
+.odontobot-bubble--typing {
+  background: #e6f7ff;
+}
+
+/* TYPING DOTS */
+.odontobot-typing {
+  display: flex;
+  gap: 4px;
+}
+
+.odontobot-typing span {
+  width: 6px;
+  height: 6px;
+  background: #00AEEF;
+  border-radius: 50%;
+  animation: blink 1.2s infinite;
+}
+
+.odontobot-typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.odontobot-typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* ANIMACIONES */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; }
+}
+
+@keyframes blink {
+  0%,100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}

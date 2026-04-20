@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException, BadRequestException, forwardRef, Inject as NestInject } from '@nestjs/common';
 import { ICartRepository, CART_REPOSITORY } from '../infrastructure/cart.repository';
 import { Order, OrderStatus, OrderCheckoutDetails } from '../domain/order.entity';
 import { IOrderRepository, ORDER_REPOSITORY } from '../infrastructure/order.repository';
@@ -7,6 +7,8 @@ import {
   IProductRepository,
 } from '../../catalog/infrastructure/product.repository';
 import { randomUUID } from 'crypto';
+import { MailService } from '../../../shared/mail.service';
+import { UserService } from '../../users/application/user.service';
 
 @Injectable()
 export class OrderService {
@@ -19,6 +21,10 @@ export class OrderService {
     private readonly orderRepository: IOrderRepository,
     @Inject(PRODUCT_REPOSITORY)
     private readonly productRepository: IProductRepository,
+    @NestInject(forwardRef(() => MailService))
+    private readonly mailService: MailService,
+    @NestInject(forwardRef(() => UserService))
+    private readonly userService: UserService,
   ) {}
 
   /**
@@ -107,6 +113,19 @@ export class OrderService {
 
     order.changeStatus(status, adminId);
     await this.orderRepository.save(order);
+
+    // Notificar al cliente por correo
+    try {
+      const user = await this.userService.findById(order.userId);
+      if (user && user.email) {
+        const subject = `Actualización de tu pedido: ${status}`;
+        const text = `Hola ${user.name},\n\nEl estado de tu pedido ha cambiado a: ${status}.\n\nGracias por comprar en Dental Pitalito.`;
+        await this.mailService.sendOrderStatusUpdate(user.email, subject, text);
+      }
+    } catch (e) {
+      this.logger.error('No se pudo enviar el correo de actualización de pedido', e);
+    }
+
     return order;
   }
 }

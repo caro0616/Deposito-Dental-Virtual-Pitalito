@@ -1,4 +1,6 @@
+import { NotificationService } from '../../services/notification.service';
 import { Component, signal, HostListener, inject, OnInit } from '@angular/core';
+import { ApplicationRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -14,17 +16,22 @@ import { filter } from 'rxjs/operators';
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
-export class NavbarComponent implements OnInit {
-  cartService    = inject(CartService);
-  authService    = inject(AuthService);
-  productService = inject(ProductService);
-  router         = inject(Router);
 
-  catalogOpen  = signal(false);
-  searchOpen   = signal(false);
-  scrolled     = signal(false);
-  isHomePage   = signal(true);
-  searchQuery  = signal('');
+export class NavbarComponent implements OnInit {
+  appRef = inject(ApplicationRef);
+  notificationService = inject(NotificationService);
+  cartService = inject(CartService);
+  authService = inject(AuthService);
+  productService = inject(ProductService);
+  router = inject(Router);
+
+  notifications = this.notificationService.notifications;
+  notificationsOpen = signal(false);
+  catalogOpen = signal(false);
+  searchOpen = signal(false);
+  scrolled = signal(false);
+  isHomePage = signal(true);
+  searchQuery = signal('');
 
   subNavLinks = [
     { label: 'Instrumental',   params: { cat: 'instrumental' } },
@@ -44,10 +51,21 @@ export class NavbarComponent implements OnInit {
       });
   }
 
+
   async ngOnInit() {
-    // Load cart if user is already logged in
+    this.notificationService.fetchAll();
     if (this.authService.isLoggedIn()) {
       await this.cartService.loadCart();
+    }
+  }
+
+  toggleNotifications() {
+    const next = !this.notificationsOpen();
+    this.notificationsOpen.set(next);
+    if (next) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
     }
   }
 
@@ -55,6 +73,14 @@ export class NavbarComponent implements OnInit {
   onDocClick(e: MouseEvent) {
     if (!(e.target as HTMLElement).closest('.catalog-dropdown')) {
       this.catalogOpen.set(false);
+    }
+    // Cierra el modal de notificaciones si se hace click fuera de la campana o del modal
+    if (
+      this.notificationsOpen() &&
+      !(e.target as HTMLElement).closest('.navbar__notif-modal-inner') &&
+      !(e.target as HTMLElement).closest('.notif-btn')
+    ) {
+      this.toggleNotifications();
     }
   }
 
