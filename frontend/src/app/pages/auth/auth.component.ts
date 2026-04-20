@@ -1,3 +1,14 @@
+function getErrorMessage(err: unknown): string {
+  if (typeof err === 'object' && err !== null) {
+    if ('error' in err && typeof (err as any).error === 'object' && (err as any).error !== null && 'message' in (err as any).error) {
+      return (err as any).error.message;
+    }
+    if ('message' in err) {
+      return (err as any).message;
+    }
+  }
+  return 'Error desconocido';
+}
 import { Component, inject, signal, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
@@ -51,8 +62,8 @@ export class AuthComponent implements AfterViewInit {
       await this.handleGoogleCredential(credential);
     } catch (err: unknown) {
       // El usuario cerró el popup o hubo un error
-      if (err?.message !== 'Google Client ID no configurado. Ver environment.ts') {
-        this.googleError.set(err?.message || 'Error con Google Sign-In');
+      if (getErrorMessage(err) !== 'Google Client ID no configurado. Ver environment.ts') {
+        this.googleError.set(getErrorMessage(err) || 'Error con Google Sign-In');
       }
     }
   }
@@ -65,7 +76,7 @@ export class AuthComponent implements AfterViewInit {
       await this.cartService.loadCart();
       this.router.navigate(['/']);
     } catch (err: unknown) {
-      this.error.set(err?.error?.message || 'Error al autenticar con Google.');
+      this.error.set(getErrorMessage(err) || 'Error al autenticar con Google.');
     } finally {
       this.loading.set(false);
     }
@@ -90,7 +101,7 @@ export class AuthComponent implements AfterViewInit {
       const credential = await this.googleAuth.promptOneTap();
       await this.handleGoogleCredential(credential);
     } catch (err: unknown) {
-      this.googleError.set(err?.message || 'Error con Google Sign-In.');
+      this.googleError.set(getErrorMessage(err) || 'Error con Google Sign-In.');
     } finally {
       this.loading.set(false);
     }
@@ -118,7 +129,7 @@ export class AuthComponent implements AfterViewInit {
       await this.cartService.loadCart();
       this.router.navigate(['/']);
     } catch (err: unknown) {
-      const msg = err?.error?.message || err?.message || 'Error al autenticar. Intenta nuevamente.';
+      const msg = getErrorMessage(err) || 'Error al autenticar. Intenta nuevamente.';
       this.error.set(msg);
     } finally {
       this.loading.set(false);
