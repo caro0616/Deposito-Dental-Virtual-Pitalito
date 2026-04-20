@@ -113,28 +113,29 @@ export class MongooseOrderRepository implements IOrderRepository {
       changedBy: sh.changedBy,
     }));
 
-    const checkoutDetails: OrderCheckoutDetails | undefined = doc.customer && doc.shipping && doc.payment
-      ? {
-          customer: {
-            fullName: doc.customer.fullName,
-            email: doc.customer.email,
-            phone: doc.customer.phone,
-            documentType: doc.customer.documentType,
-            documentNumber: doc.customer.documentNumber,
-          },
-          shipping: {
-            department: doc.shipping.department,
-            city: doc.shipping.city,
-            addressLine1: doc.shipping.addressLine1,
-            addressLine2: doc.shipping.addressLine2,
-            reference: doc.shipping.reference,
-          },
-          payment: {
-            method: doc.payment.method,
-            cardBrand: doc.payment.cardBrand,
-          },
-        }
-      : undefined;
+    const checkoutDetails: OrderCheckoutDetails | undefined =
+      doc.customer && doc.shipping && doc.payment
+        ? {
+            customer: {
+              fullName: doc.customer.fullName,
+              email: doc.customer.email,
+              phone: doc.customer.phone,
+              documentType: doc.customer.documentType,
+              documentNumber: doc.customer.documentNumber,
+            },
+            shipping: {
+              department: doc.shipping.department,
+              city: doc.shipping.city,
+              addressLine1: doc.shipping.addressLine1,
+              addressLine2: doc.shipping.addressLine2,
+              reference: doc.shipping.reference,
+            },
+            payment: {
+              method: doc.payment.method,
+              cardBrand: doc.payment.cardBrand,
+            },
+          }
+        : undefined;
 
     return new Order(
       doc._id.toHexString(),

@@ -1,6 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { CardBrand, CustomerDocumentType, OrderStatus, PaymentMethod } from '../../../domain/order.entity';
+import {
+  CardBrand,
+  CustomerDocumentType,
+  OrderStatus,
+  PaymentMethod,
+} from '../../../domain/order.entity';
 
 // ─── OrderItem subdocument ────────────────────────────────────────────────────
 

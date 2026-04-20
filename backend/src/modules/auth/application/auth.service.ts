@@ -269,9 +269,7 @@ export class AuthService {
     name: string;
   }> {
     if (!this.googleClientId) {
-      throw new InternalServerErrorException(
-        'GOOGLE_CLIENT_ID no está configurado en el backend.',
-      );
+      throw new InternalServerErrorException('GOOGLE_CLIENT_ID no está configurado en el backend.');
     }
 
     let payload: TokenPayload | undefined;

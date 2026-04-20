@@ -8,11 +8,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import {
-  CardBrand,
-  CustomerDocumentType,
-  PaymentMethod,
-} from '../../domain/order.entity';
+import { CardBrand, CustomerDocumentType, PaymentMethod } from '../../domain/order.entity';
 
 class CheckoutCustomerDto {
   @IsString()
