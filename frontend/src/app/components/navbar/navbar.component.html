@@ -1,39 +1,27 @@
 <header class="navbar" [class.navbar--scrolled]="scrolled()" [class.navbar--home]="isHomePage()">
   <div class="navbar__inner container">
 
-    <!-- Logo -->
+    <!-- Logo: solo visible fuera de home -->
     @if (!isHomePage()) {
       <a routerLink="/" class="navbar__logo">
         <img src="assets/logo.png" alt="Dental Edna Pitalito" class="navbar__logo-img" />
       </a>
     }
 
-    <!-- NAV -->
+    <!-- Main Nav solo para usuarios no admin -->
     @if (!authService.isAdmin()) {
       <nav class="navbar__nav" [class.navbar__nav--centered]="isHomePage()">
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-          Inicio
-        </a>
-
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Inicio</a>
         <div class="catalog-dropdown">
           <button class="navbar__nav-btn" (click)="toggleCatalog($event)">
             Catálogo
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L1 3h10L6 8z"/></svg>
           </button>
-
           @if (catalogOpen()) {
             <div class="catalog-dropdown__menu">
-              <a routerLink="/catalogo" (click)="catalogOpen.set(false)">
-                Todos los productos
-              </a>
-
+              <a routerLink="/catalogo" (click)="catalogOpen.set(false)">Todos los productos</a>
               @for (link of subNavLinks; track link.label) {
-                <a
-                  routerLink="/catalogo"
-                  [queryParams]="link.params"
-                  (click)="catalogOpen.set(false)"
-                >
-                  {{ link.label }}
-                </a>
+                <a routerLink="/catalogo" [queryParams]="link.params" (click)="catalogOpen.set(false)">{{ link.label }}</a>
               }
             </div>
           }
@@ -41,97 +29,120 @@
       </nav>
     }
 
-    <!-- ACTIONS -->
+    <!-- Actions -->
     <div class="navbar__actions">
-
-      <!-- BUSCADOR -->
+      <!-- Buscador solo para usuarios no admin -->
       @if (!authService.isAdmin()) {
-        <button class="icon-btn" (click)="toggleSearch()">🔍</button>
+        <button class="icon-btn" (click)="toggleSearch()">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+          </svg>
+        </button>
       }
 
-      <!-- 🔔 NOTIFICACIONES -->
+      <!-- Notificaciones -->
       @if (authService.isLoggedIn()) {
         <div style="position:relative;display:inline-block;">
-
-          <button class="icon-btn notif-btn" (click)="toggleNotifications()">
-            🔔
+          <button class="icon-btn notif-btn" (click)="toggleNotifications()" aria-label="Notificaciones">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
             @if (notificationService.unreadCount() > 0) {
               <span class="notif-badge">{{ notificationService.unreadCount() }}</span>
             }
           </button>
-
           @if (notificationsOpen()) {
             <div class="navbar__notif-modal">
               <div class="navbar__notif-modal-inner">
-
                 <h4>Notificaciones</h4>
-
-                @if (notifications().length === 0) {
-                  <p>(Sin notificaciones)</p>
-                } @else {
-                  @for (notif of notifications(); track notif._id) {
-
-                    <div class="notif-item" [class.notif-item--read]="notif.read">
-
-                      @if (notif.url && notif._id === 'denti-bot') {
-                        <a href="#" (click)="notificationService.markAsRead(notif._id); $event.preventDefault()">
-                          {{ notif.title }}
-                        </a>
-                      } @else if (notif.url) {
-                        <a [routerLink]="notif.url" (click)="notificationService.markAsRead(notif._id)">
-                          {{ notif.title }}
-                        </a>
-                      } @else {
-                        <span>{{ notif.title }}</span>
-                      }
-
-                      <button (click)="notificationService.remove(notif._id)">×</button>
-
-                    </div>
-
+                <div class="navbar__notif-list">
+                  @if (notifications().length === 0) {
+                    <p style="text-align:center;opacity:.7">(Sin notificaciones aún)</p>
+                  } @else {
+                    @for (notif of notifications(); track notif._id) {
+                      <div class="notif-item" [class.notif-item--read]="notif.read">
+                        @if (notif.url && notif._id === 'denti-bot') {
+                          <a href="#" (click)="notificationService.markAsRead(notif._id); $event.preventDefault()">
+                            {{ notif.title }}<br><small>{{ notif.message }}</small>
+                          </a>
+                        }
+                        @else {
+                          @if (notif.url && notif._id !== 'denti-bot') {
+                            <a [routerLink]="notif.url" (click)="notificationService.markAsRead(notif._id); toggleNotifications()">
+                              {{ notif.title }}<br><small>{{ notif.message }}</small>
+                            </a>
+                          }
+                          @else {
+                            <span>{{ notif.title }}<br><small>{{ notif.message }}</small></span>
+                          }
+                        }
+                        <button class="notif-x" (click)="notificationService.remove(notif._id)">×</button>
+                      </div>
+                    }
                   }
-                }
-
-                <button (click)="toggleNotifications()">Cerrar</button>
-
+                </div>
+                <button class="navbar__notif-close" (click)="toggleNotifications()">Cerrar</button>
               </div>
             </div>
           }
-
         </div>
       }
 
-      <!-- 👤 USER -->
+      <!-- User icon -->
       @if (authService.isLoggedIn()) {
-        <button (click)="logout()">Logout</button>
-      } @else {
-        <a routerLink="/auth">Login</a>
+        <div class="user-dropdown">
+          <button class="icon-btn user-dropdown__trigger">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+          </button>
+          <div class="user-dropdown__menu">
+            <span class="user-dropdown__name">{{ userName }}</span>
+            <a routerLink="/carrito">Mi Carrito</a>
+            @if (authService.isAdmin()) {
+              <a routerLink="/admin">Panel de Administración</a>
+            }
+            <button (click)="logout()">Cerrar sesión</button>
+          </div>
+        </div>
       }
-
-      <!-- 🛒 CARRITO -->
-      @if (!authService.isAdmin()) {
-        <a routerLink="/carrito" class="icon-btn">
-          🛒
-          @if (cartService.count() > 0) {
-            <span>{{ cartService.count() }}</span>
-          }
+      @else {
+        <a routerLink="/auth" class="icon-btn">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
         </a>
       }
 
-    </div> <!-- 🔥 FIN actions -->
+      <!-- Carrito solo para usuarios no admin -->
+      @if (!authService.isAdmin()) {
+        <a routerLink="/carrito" class="icon-btn navbar__cart-btn">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          @if (cartService.count() > 0) {
+            <span class="cart-badge">{{ cartService.count() }}</span>
+          }
+        </a>
+      }
+    </div>
+  </div>
 
-  </div> <!-- 🔥 FIN inner -->
-
-  <!-- 🔍 SEARCH -->
+  <!-- Search bar flotante -->
   @if (searchOpen()) {
     <div class="navbar__search">
-      <input
-        type="text"
-        placeholder="Buscar..."
-        [value]="searchQuery()"
-        (input)="searchQuery.set($any($event.target).value)"
-      />
+      <div class="container">
+        <div class="navbar__search-inner">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+          </svg>
+          <input type="text" placeholder="Buscar productos dentales…"
+                 [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)"
+                 (keydown.enter)="onSearchSubmit()" />
+          <button (click)="searchOpen.set(false)">✕</button>
+        </div>
+      </div>
     </div>
   }
-
 </header>
