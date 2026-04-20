@@ -147,7 +147,17 @@ export class DiagnosticoComponent {
         this.updateStep(step.id, { status: 'ok', ms, responsePreview: preview });
       } catch (err: unknown) {
         const ms = Math.round(performance.now() - t0);
-        const errMsg = err?.error?.message || err?.message || JSON.stringify(err?.error || err);
+        let errMsg = 'Error desconocido';
+        if (typeof err === 'object' && err !== null) {
+          const e = err as Record<string, unknown>;
+          if ('error' in e && typeof e['error'] === 'object' && e['error'] !== null && 'message' in (e['error'] as Record<string, unknown>)) {
+            errMsg = ((e['error'] as Record<string, unknown>)['message'] as string);
+          } else if ('message' in e) {
+            errMsg = (e['message'] as string);
+          } else {
+            errMsg = JSON.stringify(e['error'] || e);
+          }
+        }
         this.updateStep(step.id, { status: 'error', ms, errorDetail: errMsg });
 
         // If auth fails, skip subsequent steps that require auth
@@ -195,26 +205,32 @@ export class DiagnosticoComponent {
   // ── State extraction ─────────────────────────────────────
   private extractState(stepId: string, res: unknown) {
     if (stepId === 'register' || stepId === 'login') {
-      if (res?.token) {
-        this.token = res.token;
+      if (typeof res === 'object' && res !== null && 'token' in res) {
+        this.token = (res as Record<string, unknown>)['token'] as string;
         try {
-          const payload = JSON.parse(atob(res.token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+          const tokenStr = (res as Record<string, unknown>)['token'] as string;
+          const payload = JSON.parse(atob(tokenStr.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
           this.userId = payload.sub || '';
         } catch { /* ignore */ }
       }
     }
     if (stepId === 'catalog' || stepId === 'health') {
       if (Array.isArray(res) && res.length > 0) {
-        this.productId = res[0].id || '';
+        const first = res[0] as Record<string, unknown>;
+        this.productId = (first['id'] as string) || '';
       }
     }
     if (stepId === 'cart_add') {
-      if (res?.items?.length > 0) {
-        this.cartItemId = res.items[0].id || '';
+      if (typeof res === 'object' && res !== null && 'items' in res && Array.isArray((res as Record<string, unknown>)['items']) && ((res as Record<string, unknown>)['items'] as unknown[]).length > 0) {
+        const items = (res as Record<string, unknown>)['items'] as unknown[];
+        const firstItem = items[0] as Record<string, unknown>;
+        this.cartItemId = (firstItem['id'] as string) || '';
       }
     }
     if (stepId === 'checkout') {
-      this.orderId = res?.id || '';
+      if (typeof res === 'object' && res !== null && 'id' in res) {
+        this.orderId = (res as Record<string, unknown>)['id'] as string;
+      }
     }
   }
 
@@ -230,9 +246,10 @@ export class DiagnosticoComponent {
   private async removeSecondItem(): Promise<unknown> {
     // Get current cart and remove the last item
     const cart = await this.get('/cart');
-    if (cart?.items?.length > 1) {
-      const lastItem = cart.items[cart.items.length - 1];
-      return this.del(`/cart/items/${lastItem.id}`);
+    if (typeof cart === 'object' && cart !== null && 'items' in cart && Array.isArray((cart as Record<string, unknown>)['items']) && ((cart as Record<string, unknown>)['items'] as unknown[]).length > 1) {
+      const items = (cart as Record<string, unknown>)['items'] as unknown[];
+      const lastItem = items[items.length - 1] as Record<string, unknown>;
+      return this.del(`/cart/items/${lastItem['id']}`);
     }
     // If only one item, just return cart
     return cart;
@@ -266,13 +283,17 @@ export class DiagnosticoComponent {
       );
       return `[${res.length} items] → ${items.join(', ')}${res.length > 2 ? '…' : ''}`;
     }
-    if (typeof res === 'object') {
-      // Specific previews
-      if (res.token) return `token: ${res.token.slice(0, 40)}…`;
-      if (res.sub) return `userId: ${res.sub}, role: ${res.role}, email: ${res.email}`;
-      if (res.items !== undefined && res.total !== undefined) return `${res.items?.length ?? 0} ítems, total: $${res.total?.toLocaleString()}`;
-      if (res.status && res.id) return `orden: ${res.id.slice(-8)}, estado: ${res.status}, total: $${res.total?.toLocaleString()}`;
-      if (res.deleted) return 'Eliminado ✓';
+    if (typeof res === 'object' && res !== null) {
+      const r = res as Record<string, unknown>;
+      if ('token' in r && typeof r['token'] === 'string') return `token: ${(r['token'] as string).slice(0, 40)}…`;
+      if ('sub' in r && 'role' in r && 'email' in r) return `userId: ${r['sub']}, role: ${r['role']}, email: ${r['email']}`;
+      if ('items' in r && 'total' in r) {
+        const items = Array.isArray(r['items']) ? r['items'] as unknown[] : [];
+        const total = r['total'];
+        return `${items.length ?? 0} ítems, total: $${typeof total === 'number' ? total.toLocaleString() : total}`;
+      }
+      if ('status' in r && 'id' in r && typeof r['id'] === 'string') return `orden: ${(r['id'] as string).slice(-8)}, estado: ${r['status']}, total: $${r['total'] && typeof r['total'] === 'number' ? (r['total'] as number).toLocaleString() : r['total']}`;
+      if ('deleted' in r && r['deleted']) return 'Eliminado ✓';
       const str = JSON.stringify(res);
       return str.length > 120 ? str.slice(0, 120) + '…' : str;
     }

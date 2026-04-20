@@ -100,7 +100,16 @@ export class CheckoutComponent implements OnInit {
       this.submitSuccess.set('Pedido creado correctamente.');
       await this.router.navigate(['/carrito']);
     } catch (err: unknown) {
-      this.submitError.set(err?.error?.message || 'No se pudo completar el checkout.');
+      let msg = 'No se pudo completar el checkout.';
+      if (typeof err === 'object' && err !== null) {
+        const e = err as Record<string, unknown>;
+        if ('error' in e && typeof e['error'] === 'object' && e['error'] !== null && 'message' in (e['error'] as Record<string, unknown>)) {
+          msg = ((e['error'] as Record<string, unknown>)['message'] as string);
+        } else if ('message' in e) {
+          msg = (e['message'] as string);
+        }
+      }
+      this.submitError.set(msg);
     } finally {
       this.submitting.set(false);
     }
