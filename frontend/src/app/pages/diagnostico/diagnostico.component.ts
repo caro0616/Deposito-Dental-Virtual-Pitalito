@@ -145,7 +145,7 @@ export class DiagnosticoComponent {
 
         const preview = this.formatPreview(res);
         this.updateStep(step.id, { status: 'ok', ms, responsePreview: preview });
-      } catch (err: any) {
+      } catch (err: unknown) {
         const ms = Math.round(performance.now() - t0);
         const errMsg = err?.error?.message || err?.message || JSON.stringify(err?.error || err);
         this.updateStep(step.id, { status: 'error', ms, errorDetail: errMsg });
@@ -167,22 +167,22 @@ export class DiagnosticoComponent {
   }
 
   // ── HTTP helpers with auth ───────────────────────────────
-  private get(path: string) {
-    return firstValueFrom(this.http.get<any>(`${this.api}${path}`, { headers: this.authHeaders() }));
+  private get<T = unknown>(path: string) {
+    return firstValueFrom(this.http.get<T>(`${this.api}${path}`, { headers: this.authHeaders() }));
   }
-  private post(path: string, body: any) {
-    return firstValueFrom(this.http.post<any>(`${this.api}${path}`, body, { headers: this.authHeaders() }));
+  private post<T = unknown>(path: string, body: unknown) {
+    return firstValueFrom(this.http.post<T>(`${this.api}${path}`, body, { headers: this.authHeaders() }));
   }
-  private patch(path: string, body: any) {
-    return firstValueFrom(this.http.patch<any>(`${this.api}${path}`, body, { headers: this.authHeaders() }));
+  private patch<T = unknown>(path: string, body: unknown) {
+    return firstValueFrom(this.http.patch<T>(`${this.api}${path}`, body, { headers: this.authHeaders() }));
   }
-  private del(path: string) {
-    return firstValueFrom(this.http.delete<any>(`${this.api}${path}`, { headers: this.authHeaders() }));
+  private del<T = unknown>(path: string) {
+    return firstValueFrom(this.http.delete<T>(`${this.api}${path}`, { headers: this.authHeaders() }));
   }
-  private getAdmin(path: string) {
+  private getAdmin<T = unknown>(path: string) {
     const h = this.authHeaders();
     h['x-admin-id'] = this.userId || 'admin';
-    return firstValueFrom(this.http.get<any>(`${this.api}${path}`, { headers: h }));
+    return firstValueFrom(this.http.get<T>(`${this.api}${path}`, { headers: h }));
   }
 
   private authHeaders(): Record<string, string> {
@@ -193,7 +193,7 @@ export class DiagnosticoComponent {
   }
 
   // ── State extraction ─────────────────────────────────────
-  private extractState(stepId: string, res: any) {
+  private extractState(stepId: string, res: unknown) {
     if (stepId === 'register' || stepId === 'login') {
       if (res?.token) {
         this.token = res.token;
@@ -218,7 +218,7 @@ export class DiagnosticoComponent {
     }
   }
 
-  private async addSecondProduct(): Promise<any> {
+  private async addSecondProduct(): Promise<unknown> {
     // Get a second product ID from catalog
     const products = await this.get('/products');
     const secondId = Array.isArray(products) && products.length > 1
@@ -227,7 +227,7 @@ export class DiagnosticoComponent {
     return this.post('/cart/items', { productId: secondId, quantity: 1 });
   }
 
-  private async removeSecondItem(): Promise<any> {
+  private async removeSecondItem(): Promise<unknown> {
     // Get current cart and remove the last item
     const cart = await this.get('/cart');
     if (cart?.items?.length > 1) {
@@ -258,7 +258,7 @@ export class DiagnosticoComponent {
     }));
   }
 
-  private formatPreview(res: any): string {
+  private formatPreview(res: unknown): string {
     if (res === null || res === undefined) return '(vacío)';
     if (Array.isArray(res)) {
       const items = res.slice(0, 2).map((r: any) => r.name || r.id || JSON.stringify(r).slice(0, 60));

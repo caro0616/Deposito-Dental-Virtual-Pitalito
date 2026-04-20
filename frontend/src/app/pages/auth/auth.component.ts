@@ -49,7 +49,7 @@ export class AuthComponent implements AfterViewInit {
     try {
       const credential = await this.googleAuth.renderButton(this.googleBtnRef.nativeElement);
       await this.handleGoogleCredential(credential);
-    } catch (err: any) {
+    } catch (err: unknown) {
       // El usuario cerró el popup o hubo un error
       if (err?.message !== 'Google Client ID no configurado. Ver environment.ts') {
         this.googleError.set(err?.message || 'Error con Google Sign-In');
@@ -64,7 +64,7 @@ export class AuthComponent implements AfterViewInit {
       await this.authService.loginWithGoogle(credential);
       await this.cartService.loadCart();
       this.router.navigate(['/']);
-    } catch (err: any) {
+    } catch (err: unknown) {
       this.error.set(err?.error?.message || 'Error al autenticar con Google.');
     } finally {
       this.loading.set(false);
@@ -89,7 +89,7 @@ export class AuthComponent implements AfterViewInit {
     try {
       const credential = await this.googleAuth.promptOneTap();
       await this.handleGoogleCredential(credential);
-    } catch (err: any) {
+    } catch (err: unknown) {
       this.googleError.set(err?.message || 'Error con Google Sign-In.');
     } finally {
       this.loading.set(false);
@@ -117,7 +117,7 @@ export class AuthComponent implements AfterViewInit {
       }
       await this.cartService.loadCart();
       this.router.navigate(['/']);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = err?.error?.message || err?.message || 'Error al autenticar. Intenta nuevamente.';
       this.error.set(msg);
     } finally {

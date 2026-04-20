@@ -99,7 +99,7 @@ export class CheckoutComponent implements OnInit {
       await this.cartService.loadCart();
       this.submitSuccess.set('Pedido creado correctamente.');
       await this.router.navigate(['/carrito']);
-    } catch (err: any) {
+    } catch (err: unknown) {
       this.submitError.set(err?.error?.message || 'No se pudo completar el checkout.');
     } finally {
       this.submitting.set(false);
