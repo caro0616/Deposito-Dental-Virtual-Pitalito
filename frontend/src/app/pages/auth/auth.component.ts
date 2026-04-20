@@ -1,10 +1,16 @@
 function getErrorMessage(err: unknown): string {
   if (typeof err === 'object' && err !== null) {
-    if ('error' in err && typeof (err as any).error === 'object' && (err as any).error !== null && 'message' in (err as any).error) {
-      return (err as any).error.message;
+    const e = err as Record<string, unknown>;
+    if (
+      'error' in e &&
+      typeof e['error'] === 'object' &&
+      e['error'] !== null &&
+      'message' in (e['error'] as Record<string, unknown>)
+    ) {
+      return ((e['error'] as Record<string, unknown>)['message'] as string);
     }
-    if ('message' in err) {
-      return (err as any).message;
+    if ('message' in e) {
+      return (e['message'] as string);
     }
   }
   return 'Error desconocido';

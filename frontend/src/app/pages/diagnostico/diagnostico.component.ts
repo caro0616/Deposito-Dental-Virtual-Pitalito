@@ -101,7 +101,7 @@ export class DiagnosticoComponent {
       ...s, status: 'pending' as StepStatus, ms: 0, responsePreview: '', errorDetail: '',
     })));
 
-    const runners: Record<string, () => Promise<any>> = {
+    const runners: Record<string, () => Promise<unknown>> = {
       health:          () => this.get('/products'),
       register:        () => this.post('/auth/register', { name: this.testName, email: this.testEmail, password: this.testPassword }),
       login:           () => this.post('/auth/login', { email: this.testEmail, password: this.testPassword }),
