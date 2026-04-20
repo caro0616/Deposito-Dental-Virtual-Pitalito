@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 export interface Notification {
@@ -14,7 +14,7 @@ export interface Notification {
 export class NotificationService {
   notifications = signal<Notification[]>([]);
 
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   fetchAll() {
     this.http.get<Notification[]>('/api/notifications').subscribe(list => {

@@ -11,7 +11,7 @@ export interface OdontoBotMessage {
 export interface OdontoBotAction {
   label: string;
   type: 'add-to-cart' | 'checkout' | 'more-info' | 'compare' | 'none';
-  payload?: any;
+  payload?: Record<string, unknown>;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -21,9 +21,9 @@ export class OdontoBotService {
   private apiUrl = '/api';
 
   // Estado conversacional
-  private context: any = {};
+  private context: Record<string, unknown> = {};
 
-  constructor() {}
+
 
   // Procesa el mensaje del usuario y responde
   processMessage(message: string): Observable<OdontoBotMessage[]> {
@@ -35,13 +35,13 @@ export class OdontoBotService {
     const intent = this.detectIntent(message);
     switch (intent) {
       case 'recommend':
-        return this.recommendProducts(message);
+        return this.recommendProducts();
       case 'features':
-        return this.productFeatures(message);
+        return this.productFeatures();
       case 'compare':
-        return this.compareProducts(message);
+        return this.compareProducts();
       case 'add-to-cart':
-        return this.addToCart(message);
+        return this.addToCart();
       case 'checkout':
         return this.checkout();
       default:
@@ -66,7 +66,7 @@ export class OdontoBotService {
   }
 
   // --- Lógica de negocio simulada (conexión real después) ---
-  private recommendProducts(msg: string): Observable<OdontoBotMessage[]> {
+  private recommendProducts(): Observable<OdontoBotMessage[]> {
     // Aquí deberías llamar a tu API real de productos con filtros
     // Simulación:
     return of([
@@ -77,21 +77,21 @@ export class OdontoBotService {
     ]);
   }
 
-  private productFeatures(msg: string): Observable<OdontoBotMessage[]> {
+  private productFeatures(): Observable<OdontoBotMessage[]> {
     // Simulación:
     return of([
       { from: 'bot', text: 'La Resina Filtek Z350 es ideal para restauraciones anteriores y posteriores. Ofrece alta resistencia y excelente estética.' }
     ]);
   }
 
-  private compareProducts(msg: string): Observable<OdontoBotMessage[]> {
+  private compareProducts(): Observable<OdontoBotMessage[]> {
     // Simulación:
     return of([
       { from: 'bot', text: 'La Resina Filtek Z350 tiene mejor estética, mientras que la Tetric EvoCeram es más económica. ¿Te gustaría una recomendación personalizada?' }
     ]);
   }
 
-  private addToCart(msg: string): Observable<OdontoBotMessage[]> {
+  private addToCart(): Observable<OdontoBotMessage[]> {
     // Aquí deberías llamar a tu API real de carrito
     return of([
       { from: 'bot', text: '¿Cuántas unidades deseas agregar al carrito?' }
