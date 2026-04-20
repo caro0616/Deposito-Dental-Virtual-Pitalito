@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { IOrderRepository } from '../order.repository';
-import { Order, OrderItem, OrderStatus, OrderStatusChange } from '../../domain/order.entity';
+import {
+  Order,
+  OrderItem,
+  OrderStatus,
+  OrderStatusChange,
+  OrderCheckoutDetails,
+} from '../../domain/order.entity';
 import { OrderDoc, OrderDocument } from './schemas/order.schema';
 
 /**
@@ -79,6 +85,9 @@ export class MongooseOrderRepository implements IOrderRepository {
           : new Types.ObjectId(),
         items,
         total: order.total,
+        customer: order.checkoutDetails?.customer,
+        shipping: order.checkoutDetails?.shipping,
+        payment: order.checkoutDetails?.payment,
         status: order.status,
         statusHistory,
       });
@@ -104,11 +113,35 @@ export class MongooseOrderRepository implements IOrderRepository {
       changedBy: sh.changedBy,
     }));
 
+    const checkoutDetails: OrderCheckoutDetails | undefined = doc.customer && doc.shipping && doc.payment
+      ? {
+          customer: {
+            fullName: doc.customer.fullName,
+            email: doc.customer.email,
+            phone: doc.customer.phone,
+            documentType: doc.customer.documentType,
+            documentNumber: doc.customer.documentNumber,
+          },
+          shipping: {
+            department: doc.shipping.department,
+            city: doc.shipping.city,
+            addressLine1: doc.shipping.addressLine1,
+            addressLine2: doc.shipping.addressLine2,
+            reference: doc.shipping.reference,
+          },
+          payment: {
+            method: doc.payment.method,
+            cardBrand: doc.payment.cardBrand,
+          },
+        }
+      : undefined;
+
     return new Order(
       doc._id.toHexString(),
       (doc.userId as Types.ObjectId).toHexString(),
       items,
       doc.total,
+      checkoutDetails,
       doc.status as OrderStatus,
       statusHistory,
     );

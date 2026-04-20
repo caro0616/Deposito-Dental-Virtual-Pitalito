@@ -2,6 +2,7 @@ import { Controller, Post, Body, Get, Headers, UnauthorizedException } from '@ne
 import { AuthService } from '../application/auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -21,20 +22,12 @@ export class AuthController {
 
   /**
    * US-09: login con Google.
-   * El cliente envía el Google ID Token en el header Authorization.
-   * En producción se valida con google-auth-library; aquí se acepta
-   * el perfil JSON en el body para permitir pruebas sin OAuth configurado.
+   * El cliente envía el Google ID token oficial devuelto por GIS.
+   * El backend lo valida contra Google y hace upsert del usuario en MongoDB.
    */
   @Post('google')
-  async googleLogin(
-    @Body()
-    profile: {
-      googleId: string;
-      email: string;
-      name: string;
-    },
-  ) {
-    return this.authService.loginWithGoogle(profile);
+  async googleLogin(@Body() dto: GoogleLoginDto) {
+    return this.authService.loginWithGoogle(dto.credential);
   }
 
   /** Verificar token y obtener payload */

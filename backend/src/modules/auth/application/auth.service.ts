@@ -4,10 +4,12 @@ import {
   ConflictException,
   UnauthorizedException,
   NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { createHash, randomBytes, createHmac } from 'crypto';
+import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { UserDoc, UserDocument } from '../infrastructure/persistence/schemas/user.schema';
 import { RegisterDto } from '../presentation/dto/register.dto';
 import { LoginDto } from '../presentation/dto/login.dto';
@@ -26,6 +28,8 @@ export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   private readonly jwtSecret: string;
   private readonly jwtExpSeconds: number;
+  private readonly googleClientId: string;
+  private readonly googleClient: OAuth2Client;
 
   constructor(
     @InjectModel(UserDoc.name)
@@ -34,6 +38,8 @@ export class AuthService {
     this.jwtSecret = process.env['JWT_SECRET'] ?? 'changeme-secret-at-least-32-chars';
     const expRaw = process.env['JWT_EXPIRATION'] ?? '7d';
     this.jwtExpSeconds = this.parseExpiration(expRaw);
+    this.googleClientId = process.env['GOOGLE_CLIENT_ID'] ?? '';
+    this.googleClient = new OAuth2Client(this.googleClientId || undefined);
   }
 
   // ─── Registro ─────────────────────────────────────────────────────────────
@@ -105,39 +111,66 @@ export class AuthService {
    * Se invoca tras validar el token de Google externamente.
    * Crea el usuario si no existe (upsert) y devuelve el JWT propio.
    */
-  async loginWithGoogle(googleProfile: {
-    googleId: string;
-    email: string;
-    name: string;
-  }): Promise<{ token: string }> {
+  async loginWithGoogle(credential: string): Promise<{ token: string }> {
+    const googleProfile = await this.verifyGoogleCredential(credential);
+
     let user = await this.userModel
       .findOne({ googleId: googleProfile.googleId })
       .lean<UserDoc & { _id: Types.ObjectId }>()
       .exec();
 
     if (!user) {
-      // Buscar por email por si ya existe con provider local
-      user = await this.userModel
-        .findOneAndUpdate(
-          { email: googleProfile.email.toLowerCase() },
-          {
-            $setOnInsert: {
-              email: googleProfile.email.toLowerCase(),
-              name: googleProfile.name,
-              role: 'customer',
-              provider: 'google',
-              googleId: googleProfile.googleId,
-              passwordHash: '',
-            },
-          },
-          { upsert: true, new: true },
-        )
+      const existingByEmail = await this.userModel
+        .findOne({ email: googleProfile.email.toLowerCase() })
         .lean<UserDoc & { _id: Types.ObjectId }>()
         .exec();
+
+      if (existingByEmail) {
+        if (!existingByEmail.active) {
+          throw new UnauthorizedException('Cuenta desactivada');
+        }
+
+        user = await this.userModel
+          .findByIdAndUpdate(
+            existingByEmail._id,
+            {
+              $set: {
+                googleId: googleProfile.googleId,
+                name: googleProfile.name,
+              },
+            },
+            { returnDocument: 'after' },
+          )
+          .lean<UserDoc & { _id: Types.ObjectId }>()
+          .exec();
+      } else {
+        user = await this.userModel
+          .findOneAndUpdate(
+            { googleId: googleProfile.googleId },
+            {
+              $set: {
+                email: googleProfile.email.toLowerCase(),
+                name: googleProfile.name,
+                role: 'customer',
+                provider: 'google',
+                googleId: googleProfile.googleId,
+                passwordHash: '',
+                active: true,
+              },
+            },
+            { upsert: true, returnDocument: 'after' },
+          )
+          .lean<UserDoc & { _id: Types.ObjectId }>()
+          .exec();
+      }
     }
 
     if (!user) {
       throw new NotFoundException('No se pudo crear el usuario de Google');
+    }
+
+    if (!user.active) {
+      throw new UnauthorizedException('Cuenta desactivada');
     }
 
     const userId = user._id.toHexString();
@@ -228,5 +261,43 @@ export class AuthService {
     const unit = match[2];
     const units: Record<string, number> = { s: 1, m: 60, h: 3600, d: 86400 };
     return value * (units[unit] ?? 1);
+  }
+
+  private async verifyGoogleCredential(credential: string): Promise<{
+    googleId: string;
+    email: string;
+    name: string;
+  }> {
+    if (!this.googleClientId) {
+      throw new InternalServerErrorException(
+        'GOOGLE_CLIENT_ID no está configurado en el backend.',
+      );
+    }
+
+    let payload: TokenPayload | undefined;
+
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken: credential,
+        audience: this.googleClientId,
+      });
+      payload = ticket.getPayload();
+    } catch {
+      throw new UnauthorizedException('Token de Google inválido');
+    }
+
+    if (!payload?.sub || !payload.email) {
+      throw new UnauthorizedException('El token de Google no contiene datos válidos');
+    }
+
+    if (payload.email_verified === false) {
+      throw new UnauthorizedException('La cuenta de Google no tiene el correo verificado');
+    }
+
+    return {
+      googleId: payload.sub,
+      email: payload.email.toLowerCase(),
+      name: payload.name?.trim() || payload.email.split('@')[0] || 'Usuario Google',
+    };
   }
 }

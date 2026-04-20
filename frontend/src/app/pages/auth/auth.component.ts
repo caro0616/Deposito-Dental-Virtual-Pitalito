@@ -47,9 +47,8 @@ export class AuthComponent implements AfterViewInit {
   private async initGoogleButton() {
     if (!this.googleBtnRef?.nativeElement) return;
     try {
-      const profile = await this.googleAuth.renderButton(this.googleBtnRef.nativeElement);
-      // El usuario completó el flujo de Google
-      await this.handleGoogleProfile(profile);
+      const credential = await this.googleAuth.renderButton(this.googleBtnRef.nativeElement);
+      await this.handleGoogleCredential(credential);
     } catch (err: any) {
       // El usuario cerró el popup o hubo un error
       if (err?.message !== 'Google Client ID no configurado. Ver environment.ts') {
@@ -58,11 +57,11 @@ export class AuthComponent implements AfterViewInit {
     }
   }
 
-  private async handleGoogleProfile(profile: { googleId: string; email: string; name: string }) {
+  private async handleGoogleCredential(credential: string) {
     this.loading.set(true);
     this.error.set('');
     try {
-      await this.authService.loginWithGoogle(profile);
+      await this.authService.loginWithGoogle(credential);
       await this.cartService.loadCart();
       this.router.navigate(['/']);
     } catch (err: any) {
@@ -88,8 +87,8 @@ export class AuthComponent implements AfterViewInit {
     this.loading.set(true);
     this.googleError.set('');
     try {
-      const profile = await this.googleAuth.promptOneTap();
-      await this.handleGoogleProfile(profile);
+      const credential = await this.googleAuth.promptOneTap();
+      await this.handleGoogleCredential(credential);
     } catch (err: any) {
       this.googleError.set(err?.message || 'Error con Google Sign-In.');
     } finally {

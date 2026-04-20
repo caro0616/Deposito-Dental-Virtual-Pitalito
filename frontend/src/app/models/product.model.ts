@@ -48,6 +48,9 @@ export interface CartBackend {
 
 // ── Orders (aligned with backend Order domain entity) ─────
 export type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
+export type CustomerDocumentType = 'cc' | 'ce' | 'nit' | 'passport';
+export type PaymentMethod = 'pse' | 'card';
+export type CardBrand = 'visa' | 'mastercard' | 'amex';
 
 export interface OrderItem {
   productId: string;
@@ -64,11 +67,39 @@ export interface OrderStatusChange {
   changedBy: string;
 }
 
+export interface OrderCustomer {
+  fullName: string;
+  email: string;
+  phone: string;
+  documentType: CustomerDocumentType;
+  documentNumber: string;
+}
+
+export interface OrderShipping {
+  department: string;
+  city: string;
+  addressLine1: string;
+  addressLine2?: string;
+  reference?: string;
+}
+
+export interface OrderPayment {
+  method: PaymentMethod;
+  cardBrand?: CardBrand;
+}
+
+export interface CheckoutPayload {
+  customer: OrderCustomer;
+  shipping: OrderShipping;
+  payment: OrderPayment;
+}
+
 export interface Order {
   id: string;
   userId: string;
   items: OrderItem[];
   total: number;
+  checkoutDetails?: CheckoutPayload;
   status: OrderStatus;
   statusHistory: OrderStatusChange[];
 }

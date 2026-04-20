@@ -71,6 +71,21 @@ export class ProductDetailComponent implements OnInit {
     }
   }
 
+  async buyNow() {
+    const prod = this.product();
+    if (!prod) return;
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/auth']);
+      return;
+    }
+    try {
+      await this.cartService.add(prod.id, this.quantity());
+      this.router.navigate(['/checkout']);
+    } catch (err) {
+      console.error('Error en compra rápida:', err);
+    }
+  }
+
   incQty() { this.quantity.update(q => q + 1); }
   decQty() { this.quantity.update(q => Math.max(1, q - 1)); }
 

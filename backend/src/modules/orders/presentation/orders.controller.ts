@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { OrderService } from '../application/order.service';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { CheckoutOrderDto } from './dto/checkout-order.dto';
 
 /**
  * Controlador de órdenes.
@@ -35,9 +36,12 @@ export class OrdersController {
    * Crea la orden, decrementa inventario y vacía el carrito.
    */
   @Post('orders/checkout')
-  async checkout(@Headers() headers: Record<string, string>) {
+  async checkout(
+    @Headers() headers: Record<string, string>,
+    @Body() body: CheckoutOrderDto,
+  ) {
     const userId = this.extractHeader(headers, 'x-user-id');
-    return this.orderService.checkout(userId);
+    return this.orderService.checkout(userId, body);
   }
 
   /**

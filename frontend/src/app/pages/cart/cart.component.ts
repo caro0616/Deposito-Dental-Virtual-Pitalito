@@ -37,18 +37,15 @@ export class CartComponent implements OnInit {
   get favorites() { return this.productService.getFavorites(); }
 
   async checkout() {
-    this.checkingOut.set(true);
-    this.checkoutError.set('');
-    try {
-      await this.orderService.checkout();
-      this.cartService.clearLocal();
-      await this.cartService.loadCart();
-      this.previousOrders.set(this.orderService.orders());
-    } catch (err: any) {
-      this.checkoutError.set(err?.error?.message || 'Error al procesar el pedido.');
-    } finally {
-      this.checkingOut.set(false);
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/auth']);
+      return;
     }
+    if (this.cartService.items().length === 0) {
+      this.checkoutError.set('Agrega productos al carrito antes de continuar.');
+      return;
+    }
+    this.router.navigate(['/checkout']);
   }
 
   getStatusLabel(status: string): string {

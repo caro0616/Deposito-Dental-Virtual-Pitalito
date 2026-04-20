@@ -40,9 +40,9 @@ export class AuthService {
   }
 
   // ── Login Google ──────────────────────────────────────
-  async loginWithGoogle(profile: { googleId: string; email: string; name: string }): Promise<void> {
+  async loginWithGoogle(credential: string): Promise<void> {
     const res = await firstValueFrom(
-      this.http.post<AuthResponse>(`${this.api}/auth/google`, profile)
+      this.http.post<AuthResponse>(`${this.api}/auth/google`, { credential })
     );
     this.handleAuthResponse(res);
   }

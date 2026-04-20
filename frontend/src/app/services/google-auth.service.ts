@@ -37,7 +37,7 @@ export interface GoogleProfile {
 export class GoogleAuthService {
   private zone = inject(NgZone);
   private _initialized = false;
-  private _resolve: ((profile: GoogleProfile) => void) | null = null;
+  private _resolve: ((credential: string) => void) | null = null;
   private _reject: ((err: Error) => void) | null = null;
 
   get isConfigured(): boolean {
@@ -76,8 +76,10 @@ export class GoogleAuthService {
       callback: (response: { credential: string }) => {
         this.zone.run(() => {
           try {
-            const profile = this.decodeCredential(response.credential);
-            this._resolve?.(profile);
+            if (!response.credential) {
+              throw new Error('Google no devolvió un credential válido');
+            }
+            this._resolve?.(response.credential);
           } catch (err) {
             this._reject?.(err instanceof Error ? err : new Error(String(err)));
           } finally {
@@ -95,14 +97,14 @@ export class GoogleAuthService {
    * Renderiza el botón oficial de Google dentro del contenedor dado.
    * Retorna un Promise que se resuelve cuando el usuario complete el flujo.
    */
-  async renderButton(container: HTMLElement): Promise<GoogleProfile> {
+  async renderButton(container: HTMLElement): Promise<string> {
     if (!this.isConfigured) {
       throw new Error('Google Client ID no configurado. Ver environment.ts');
     }
 
     await this.initialize();
 
-    return new Promise<GoogleProfile>((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       this._resolve = resolve;
       this._reject = reject;
 
@@ -122,42 +124,17 @@ export class GoogleAuthService {
   /**
    * Alternativa: usar One Tap (popup automático).
    */
-  async promptOneTap(): Promise<GoogleProfile> {
+  async promptOneTap(): Promise<string> {
     if (!this.isConfigured) {
       throw new Error('Google Client ID no configurado.');
     }
 
     await this.initialize();
 
-    return new Promise<GoogleProfile>((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       this._resolve = resolve;
       this._reject = reject;
       google.accounts.id.prompt();
     });
-  }
-
-  /**
-   * Decodifica el credential JWT de Google para extraer el perfil.
-   * El credential es un JWT firmado por Google; el payload contiene:
-   *   sub (googleId), email, name, picture, email_verified, etc.
-   */
-  private decodeCredential(credential: string): GoogleProfile {
-    const parts = credential.split('.');
-    if (parts.length !== 3) throw new Error('Credential JWT inválido');
-
-    const payload = JSON.parse(
-      atob(parts[1]!.replace(/-/g, '+').replace(/_/g, '/'))
-    );
-
-    if (!payload.sub || !payload.email) {
-      throw new Error('Credential incompleto: falta sub o email');
-    }
-
-    return {
-      googleId: payload.sub,
-      email: payload.email,
-      name: payload.name || payload.email.split('@')[0],
-      picture: payload.picture,
-    };
   }
 }

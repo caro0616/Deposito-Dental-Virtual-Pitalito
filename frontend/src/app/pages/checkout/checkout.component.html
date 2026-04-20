@@ -1,0 +1,176 @@
+<div class="checkout-page container">
+  <div class="checkout-header">
+    <div>
+      <p class="checkout-kicker">Finaliza tu compra</p>
+      <h1>Checkout</h1>
+      <p>Completa los datos del comprador, la dirección de entrega y el método de pago antes de generar la orden.</p>
+    </div>
+    <a routerLink="/carrito" class="checkout-back">Volver al carrito</a>
+  </div>
+
+  @if (cartService.items().length === 0) {
+    <section class="checkout-empty">
+      <h2>No hay productos listos para pagar</h2>
+      <p>Agrega artículos al carrito o usa “Comprar ahora” desde un producto para traerlos a esta pantalla.</p>
+      <a routerLink="/catalogo" class="btn btn--primary">Ir al catálogo</a>
+    </section>
+  } @else {
+    <div class="checkout-layout">
+      <form class="checkout-form" [formGroup]="form" (ngSubmit)="submitOrder()">
+        <section class="checkout-card" formGroupName="customer">
+          <div class="checkout-card__header">
+            <span>1</span>
+            <div>
+              <h2>Datos del comprador</h2>
+              <p>Usaremos esta información para contacto y facturación.</p>
+            </div>
+          </div>
+
+          <div class="checkout-grid checkout-grid--2">
+            <label>
+              <span>Nombre completo</span>
+              <input type="text" formControlName="fullName" placeholder="Nombre y apellidos" />
+            </label>
+            <label>
+              <span>Correo electrónico</span>
+              <input type="email" formControlName="email" placeholder="correo@ejemplo.com" />
+            </label>
+            <label>
+              <span>Teléfono</span>
+              <input type="tel" formControlName="phone" placeholder="3001234567" />
+            </label>
+            <label>
+              <span>Tipo de documento</span>
+              <select formControlName="documentType">
+                @for (item of documentTypes; track item.value) {
+                  <option [value]="item.value">{{ item.label }}</option>
+                }
+              </select>
+            </label>
+            <label class="checkout-grid__full">
+              <span>Número de documento</span>
+              <input type="text" formControlName="documentNumber" placeholder="Sin puntos ni espacios" />
+            </label>
+          </div>
+        </section>
+
+        <section class="checkout-card" formGroupName="shipping">
+          <div class="checkout-card__header">
+            <span>2</span>
+            <div>
+              <h2>Entrega</h2>
+              <p>Indica la dirección donde quieres recibir el pedido.</p>
+            </div>
+          </div>
+
+          <div class="checkout-grid checkout-grid--2">
+            <label>
+              <span>Departamento</span>
+              <input type="text" formControlName="department" placeholder="Huila" />
+            </label>
+            <label>
+              <span>Ciudad</span>
+              <input type="text" formControlName="city" placeholder="Pitalito" />
+            </label>
+            <label class="checkout-grid__full">
+              <span>Dirección principal</span>
+              <input type="text" formControlName="addressLine1" placeholder="Calle 12 # 10-45" />
+            </label>
+            <label>
+              <span>Apartamento, oficina o interior</span>
+              <input type="text" formControlName="addressLine2" placeholder="Opcional" />
+            </label>
+            <label>
+              <span>Referencia adicional</span>
+              <input type="text" formControlName="reference" placeholder="Frente al parque" />
+            </label>
+          </div>
+        </section>
+
+        <section class="checkout-card" formGroupName="payment">
+          <div class="checkout-card__header">
+            <span>3</span>
+            <div>
+              <h2>Método de pago</h2>
+              <p>Por ahora registramos el método para preparar la orden; la pasarela real puede integrarse después.</p>
+            </div>
+          </div>
+
+          <div class="payment-options">
+            <label class="payment-option" [class.payment-option--active]="paymentMethod() === 'pse'">
+              <input type="radio" formControlName="method" value="pse" />
+              <div>
+                <strong>PSE</strong>
+                <span>Pago desde cuenta bancaria</span>
+              </div>
+            </label>
+
+            <label class="payment-option" [class.payment-option--active]="paymentMethod() === 'card'">
+              <input type="radio" formControlName="method" value="card" />
+              <div>
+                <strong>Tarjeta</strong>
+                <span>Débito o crédito: Visa, Mastercard o Amex</span>
+              </div>
+            </label>
+          </div>
+
+          @if (paymentMethod() === 'card') {
+            <div class="checkout-grid checkout-grid--3 payment-brands">
+              @for (brand of cardBrands; track brand) {
+                <label class="payment-brand">
+                  <input type="radio" formControlName="cardBrand" [value]="brand" />
+                  <span>{{ brand === 'mastercard' ? 'Mastercard' : brand === 'amex' ? 'American Express' : 'Visa' }}</span>
+                </label>
+              }
+            </div>
+          }
+        </section>
+
+        @if (submitError()) {
+          <p class="checkout-message checkout-message--error">{{ submitError() }}</p>
+        }
+      </form>
+
+      <aside class="checkout-summary">
+        <section class="checkout-card checkout-card--sticky">
+          <h2>Resumen de pago</h2>
+
+          <div class="checkout-summary__items">
+            @for (item of cartService.items(); track item.id) {
+              <div class="checkout-summary__item">
+                <div>
+                  <strong>{{ item.name }}</strong>
+                  <span>{{ item.quantity }} x $ {{ item.unitPrice | number:'1.0-0' }}</span>
+                </div>
+                <span>$ {{ item.subtotal | number:'1.0-0' }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="checkout-summary__row">
+            <span>Subtotal</span>
+            <span>$ {{ cartService.subtotal() | number:'1.0-0' }}</span>
+          </div>
+          <div class="checkout-summary__row">
+            <span>Envío</span>
+            <span>$ {{ cartService.shipping() | number:'1.0-0' }}</span>
+          </div>
+          <div class="checkout-summary__row checkout-summary__row--total">
+            <strong>Total</strong>
+            <strong>$ {{ total() | number:'1.0-0' }}</strong>
+          </div>
+
+          <button class="btn btn--primary checkout-summary__submit"
+                  [disabled]="submitting()"
+                  (click)="submitOrder()">
+            @if (submitting()) {
+              Creando orden...
+            } @else {
+              Confirmar pedido
+            }
+          </button>
+        </section>
+      </aside>
+    </div>
+  }
+</div>

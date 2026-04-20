@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { ICartRepository, CART_REPOSITORY } from '../infrastructure/cart.repository';
-import { Order, OrderStatus } from '../domain/order.entity';
+import { Order, OrderStatus, OrderCheckoutDetails } from '../domain/order.entity';
 import { IOrderRepository, ORDER_REPOSITORY } from '../infrastructure/order.repository';
 import {
   PRODUCT_REPOSITORY,
@@ -25,7 +25,7 @@ export class OrderService {
    * US-10: finalizar compra.
    * Valida stock, crea la orden, decrementa inventario y vacía el carrito.
    */
-  async checkout(userId: string): Promise<Order> {
+  async checkout(userId: string, checkoutDetails: OrderCheckoutDetails): Promise<Order> {
     const cart = await this.cartRepository.findByUserId(userId);
     if (!cart || cart.items.length === 0) {
       throw new BadRequestException('El carrito está vacío');
@@ -55,6 +55,7 @@ export class OrderService {
         subtotal: item.subtotal,
       })),
       cart.total,
+      checkoutDetails,
       'pending',
     );
 
