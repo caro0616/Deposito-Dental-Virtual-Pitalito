@@ -261,7 +261,9 @@ export class DiagnosticoComponent {
   private formatPreview(res: unknown): string {
     if (res === null || res === undefined) return '(vacío)';
     if (Array.isArray(res)) {
-      const items = res.slice(0, 2).map((r: any) => r.name || r.id || JSON.stringify(r).slice(0, 60));
+      const items = res.slice(0, 2).map((r: Record<string, unknown>) =>
+        r['name'] || r['id'] || JSON.stringify(r).slice(0, 60)
+      );
       return `[${res.length} items] → ${items.join(', ')}${res.length > 2 ? '…' : ''}`;
     }
     if (typeof res === 'object') {
