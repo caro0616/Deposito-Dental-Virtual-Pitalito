@@ -26,7 +26,7 @@ export class CheckoutComponent implements OnInit {
   readonly submitSuccess = signal('');
   readonly paymentMethod = signal<PaymentMethod>('pse');
   readonly cardBrands: CardBrand[] = ['visa', 'mastercard', 'amex'];
-  readonly documentTypes: Array<{ value: CustomerDocumentType; label: string }> = [
+  readonly documentTypes: { value: CustomerDocumentType; label: string }[] = [
     { value: 'cc', label: 'Cédula de ciudadanía' },
     { value: 'ce', label: 'Cédula de extranjería' },
     { value: 'nit', label: 'NIT' },
