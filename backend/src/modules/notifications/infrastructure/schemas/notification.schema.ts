@@ -4,13 +4,16 @@ import { Document } from 'mongoose';
 @Schema({ timestamps: true })
 export class NotificationDoc {
   @Prop({ required: true })
-  title: string;
+  title!: string;
 
   @Prop({ required: true })
-  message: string;
+  message!: string;
 
   @Prop()
   url?: string;
+
+  @Prop()
+  createdAt?: Date;
 }
 
 export type NotificationDocument = NotificationDoc & Document;

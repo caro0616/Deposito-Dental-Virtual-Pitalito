@@ -12,10 +12,24 @@ export class NotificationRepository {
   ) {}
 
   async findAll(): Promise<Notification[]> {
-    return this.notificationModel.find().sort({ createdAt: -1 }).lean();
+    const docs = await this.notificationModel.find({}, null, { sort: { createdAt: -1 } }).lean();
+    return docs.map((doc) => ({
+      _id: doc._id ? String(doc._id) : undefined,
+      title: doc.title,
+      message: doc.message,
+      url: doc.url,
+      createdAt: (doc as { createdAt?: Date }).createdAt ?? new Date(0),
+    }));
   }
 
   async create(notification: Notification): Promise<Notification> {
-    return this.notificationModel.create(notification);
+    const doc = await this.notificationModel.create(notification);
+    return {
+      _id: doc._id?.toString?.() ?? doc._id,
+      title: doc.title,
+      message: doc.message,
+      url: doc.url,
+      createdAt: doc.createdAt ?? new Date(),
+    };
   }
 }
