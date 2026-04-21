@@ -190,6 +190,32 @@
   margin-top: 1rem;
 }
 
+.payment-detail-fields {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.payment-expiry-cvv {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: start;
+}
+
+.expiry-group {
+  display: flex;
+  gap: 0.5rem;
+
+  select {
+    flex: 1;
+  }
+}
+
+.cvv-label {
+  width: 120px;
+}
+
 .checkout-field-error {
   margin: 0.5rem 0 0;
   font-size: 0.88rem;
