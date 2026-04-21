@@ -8,12 +8,14 @@
     <a routerLink="/carrito" class="checkout-back">Volver al carrito</a>
   </div>
 
-  <div *ngIf="submitSuccess()" class="checkout-success-modal">
-    <div class="checkout-success-modal__content">
-      <h2>¡Pago exitoso!</h2>
-      <p>Tu pedido ha sido registrado correctamente.</p>
+  @if (submitSuccess()) {
+    <div class="checkout-success-modal">
+      <div class="checkout-success-modal__content">
+        <h2>¡Pago exitoso!</h2>
+        <p>Tu pedido ha sido registrado correctamente.</p>
+      </div>
     </div>
-  </div>
+  }
   @if (!submitSuccess() && cartService.items().length === 0) {
     <section class="checkout-empty">
       <h2>No hay productos listos para pagar</h2>

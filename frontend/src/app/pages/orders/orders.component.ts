@@ -15,7 +15,7 @@ export class OrdersComponent implements OnInit {
   orders = this.orderService.orders;
   loading = this.orderService.loading;
 
-  isLast(items: any[], item: any): boolean {
+  isLast<T>(items: T[], item: T): boolean {
     return items[items.length - 1] === item;
   }
 
