@@ -14,7 +14,8 @@
   @for (order of orders(); track order.id) {
     <div class="order-card">
       <div class="order-header">
-        <span><strong>ID:</strong> {{ order.id }}</span>
+        <span><strong>ID de pedido:</strong> {{ order.id.slice(0, 12) }}</span>
+        <span><strong>Fecha:</strong> {{ order.createdAt ? (order.createdAt | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
         <span 
           class="status"
           [style.background]="getStatusColor(order.status)">
@@ -22,14 +23,13 @@
         </span>
       </div>
 
-      <div class="order-items">
-        @for (item of order.items; track item.productId) {
-          <div class="item">
-            <span>{{ item.name }}</span>
-            <span>x{{ item.quantity }}</span>
-            <span>${{ item.subtotal }}</span>
-          </div>
-        }
+      <div class="order-description">
+        <strong>Descripción:</strong>
+        <span>
+          @for (item of order.items; track item.productId) {
+            {{ item.name }} (x{{ item.quantity }})<span *ngIf="!isLast(order.items, item)">, </span>
+          }
+        </span>
       </div>
 
       <div class="order-footer">

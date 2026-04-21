@@ -15,6 +15,10 @@ export class OrdersComponent implements OnInit {
   orders = this.orderService.orders;
   loading = this.orderService.loading;
 
+  isLast(items: any[], item: any): boolean {
+    return items[items.length - 1] === item;
+  }
+
   ngOnInit(): void {
     this.orderService.loadMyOrders();
   }

@@ -57,9 +57,9 @@
           <h3>Marca</h3>
           <div class="filters__options">
             @for (brand of brands; track brand) {
-              <label class="filters__radio" [class.active]="isBrandSelected(brand)">
-                <span class="filters__dot" [class.filled]="isBrandSelected(brand)" style="background:#004F7C"></span>
-                <input type="radio" name="brand" [value]="brand" [checked]="isBrandSelected(brand)" (change)="selectBrand(brand)" hidden/>
+              <label class="filters__checkbox">
+                <input type="checkbox" [checked]="isBrandSelected(brand)" (change)="toggleBrand(brand)" />
+                <span class="filters__check-box"></span>
                 {{ brand }}
               </label>
             }
@@ -89,14 +89,14 @@
       <div class="catalog-results">
         @if (loading()) {
           <div class="empty-state"><p>Cargando productos...</p></div>
-        } @else if (products().length === 0) {
+        } @else if (products.length === 0) {
           <div class="empty-state">
             <p>No se encontraron productos con los filtros seleccionados.</p>
           </div>
         } @else {
           <div class="catalog-grid grid-3x3">
             @for (product of pagedProducts(); track product.id) {
-              <app-product-card [product]="product" />
+              <app-product-card [product]="product" (favoriteToggled)="onFavoriteToggled()" />
             }
           </div>
           <div class="catalog-pagination">

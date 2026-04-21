@@ -1,3 +1,31 @@
+// Modal de éxito checkout
+.checkout-success-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #eaf2fc; // color plano, sin texto ni overlay
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  .checkout-success-modal__content {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 32px 0 rgba(37,99,235,0.18);
+    padding: 40px 32px;
+    text-align: center;
+    h2 {
+      color: #2563eb;
+      margin-bottom: 12px;
+    }
+    p {
+      color: #1A2940;
+      font-size: 1.1rem;
+    }
+  }
+}
 .checkout-page {
   padding: 2rem 0 4rem;
 }

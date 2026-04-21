@@ -102,6 +102,8 @@ export interface Order {
   checkoutDetails?: CheckoutPayload;
   status: OrderStatus;
   statusHistory: OrderStatusChange[];
+  orderNumber?: number;
+  createdAt?: string | Date;
 }
 
 // ── Auth ──────────────────────────────────────────────────

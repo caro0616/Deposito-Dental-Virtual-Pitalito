@@ -11,22 +11,7 @@
     @if (!authService.isAdmin()) {
       <nav class="navbar__nav" [class.navbar__nav--centered]="isHomePage()">
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Inicio</a>
-        <div class="catalog-dropdown">
-          <button class="navbar__nav-btn" (click)="toggleCatalog($event)">
-            Catálogo
-            <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
-              <path d="M6 8L1 3h10L6 8z" />
-            </svg>
-          </button>
-          @if (catalogOpen()) {
-            <div class="catalog-dropdown__menu">
-              <a routerLink="/catalogo" (click)="catalogOpen.set(false)">Todos los productos</a>
-              @for (link of subNavLinks; track link.label) {
-                <a routerLink="/catalogo" [queryParams]="link.params" (click)="catalogOpen.set(false)">{{ link.label }}</a>
-              }
-            </div>
-          }
-        </div>
+        <a routerLink="/catalogo" routerLinkActive="active">Catálogo</a>
       </nav>
     }
 

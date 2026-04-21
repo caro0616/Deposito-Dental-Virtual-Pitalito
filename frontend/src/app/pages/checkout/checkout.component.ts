@@ -135,8 +135,11 @@ export class CheckoutComponent implements OnInit {
       await this.orderService.checkout(payload);
       this.cartService.clearLocal();
       await this.cartService.loadCart();
-      this.submitSuccess.set('Pago procesado y pedido creado correctamente. Redirigiendo...');
-      await this.router.navigate(['/orders']);
+      this.submitSuccess.set('¡Pago exitoso!');
+      setTimeout(async () => {
+        this.submitSuccess.set('');
+        await this.router.navigate(['/orders']);
+      }, 2200);
     } catch (err: unknown) {
       let msg = 'No se pudo completar el checkout.';
       if (typeof err === 'object' && err !== null) {
