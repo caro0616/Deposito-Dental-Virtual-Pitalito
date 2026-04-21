@@ -114,20 +114,97 @@
             </label>
           </div>
 
+          @if (paymentMethod() === 'pse') {
+            <div class="payment-detail-fields">
+              <label>
+                <span>Banco</span>
+                <select formControlName="pseBank">
+                  <option value="">Selecciona tu banco</option>
+                  @for (bank of pseBanks; track bank) {
+                    <option [value]="bank">{{ bank }}</option>
+                  }
+                </select>
+                @if (form.controls.payment.controls.pseBank.invalid && form.controls.payment.controls.pseBank.touched) {
+                  <p class="checkout-field-error">Selecciona tu banco.</p>
+                }
+              </label>
+              <label>
+                <span>Titular de la cuenta</span>
+                <input type="text" formControlName="pseAccountHolder" placeholder="Nombre como aparece en el banco" />
+                @if (form.controls.payment.controls.pseAccountHolder.invalid && form.controls.payment.controls.pseAccountHolder.touched) {
+                  <p class="checkout-field-error">Ingresa el nombre del titular.</p>
+                }
+              </label>
+            </div>
+          }
+
           @if (paymentMethod() === 'card') {
             <div class="checkout-grid checkout-grid--3 payment-brands">
               @for (brand of cardBrands; track brand) {
-                <label class="payment-brand">
+                <label class="payment-brand" [class.payment-brand--active]="form.controls.payment.controls.cardBrand.value === brand">
                   <input type="radio" formControlName="cardBrand" [value]="brand" />
                   <span>{{ brand === 'mastercard' ? 'Mastercard' : brand === 'amex' ? 'American Express' : 'Visa' }}</span>
                 </label>
               }
+            </div>
+            @if (form.controls.payment.controls.cardBrand.invalid && form.controls.payment.controls.cardBrand.touched) {
+              <p class="checkout-field-error">Selecciona la marca de tu tarjeta.</p>
+            }
+
+            <div class="payment-detail-fields">
+              <label class="checkout-grid__full">
+                <span>Número de tarjeta</span>
+                <input type="text" formControlName="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" (input)="formatCardNumber($event)" />
+                @if (form.controls.payment.controls.cardNumber.invalid && form.controls.payment.controls.cardNumber.touched) {
+                  <p class="checkout-field-error">Ingresa el número completo de la tarjeta.</p>
+                }
+              </label>
+              <label class="checkout-grid__full">
+                <span>Nombre en la tarjeta</span>
+                <input type="text" formControlName="nameOnCard" placeholder="Como aparece en la tarjeta" />
+                @if (form.controls.payment.controls.nameOnCard.invalid && form.controls.payment.controls.nameOnCard.touched) {
+                  <p class="checkout-field-error">Ingresa el nombre tal como aparece en la tarjeta.</p>
+                }
+              </label>
+              <div class="payment-expiry-cvv">
+                <label class="expiry-label">
+                  <span>Vencimiento</span>
+                  <div class="expiry-group">
+                    <select formControlName="expiryMonth">
+                      <option value="">MM</option>
+                      @for (m of expiryMonths; track m) {
+                        <option [value]="m">{{ m }}</option>
+                      }
+                    </select>
+                    <select formControlName="expiryYear">
+                      <option value="">AAAA</option>
+                      @for (y of expiryYears; track y) {
+                        <option [value]="y">{{ y }}</option>
+                      }
+                    </select>
+                  </div>
+                  @if ((form.controls.payment.controls.expiryMonth.invalid || form.controls.payment.controls.expiryYear.invalid) &&
+                       (form.controls.payment.controls.expiryMonth.touched || form.controls.payment.controls.expiryYear.touched)) {
+                    <p class="checkout-field-error">Selecciona la fecha de vencimiento.</p>
+                  }
+                </label>
+                <label class="cvv-label">
+                  <span>CVV</span>
+                  <input type="password" formControlName="cvv" placeholder="•••" maxlength="4" />
+                  @if (form.controls.payment.controls.cvv.invalid && form.controls.payment.controls.cvv.touched) {
+                    <p class="checkout-field-error">CVV requerido.</p>
+                  }
+                </label>
+              </div>
             </div>
           }
         </section>
 
         @if (submitError()) {
           <p class="checkout-message checkout-message--error">{{ submitError() }}</p>
+        }
+        @if (submitSuccess()) {
+          <p class="checkout-message checkout-message--success">{{ submitSuccess() }}</p>
         }
       </form>
 
@@ -164,9 +241,11 @@
                   [disabled]="submitting()"
                   (click)="submitOrder()">
             @if (submitting()) {
-              Creando orden...
+              Procesando pago...
+            } @else if (paymentMethod() === 'card') {
+              Pagar $ {{ total() | number:'1.0-0' }}
             } @else {
-              Confirmar pedido
+              Continuar con PSE
             }
           </button>
         </section>

@@ -25,7 +25,25 @@ export class CheckoutComponent implements OnInit {
   readonly submitError = signal('');
   readonly submitSuccess = signal('');
   readonly paymentMethod = signal<PaymentMethod>('pse');
+
   readonly cardBrands: CardBrand[] = ['visa', 'mastercard', 'amex'];
+
+  readonly pseBanks = [
+    'Bancolombia',
+    'Banco de Bogotá',
+    'Davivienda',
+    'BBVA Colombia',
+    'Banco de Occidente',
+    'Banco Popular',
+    'AV Villas',
+    'Banco Caja Social',
+    'Nequi',
+    'Banco Falabella',
+  ];
+
+  readonly expiryMonths = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+  readonly expiryYears = Array.from({ length: 10 }, (_, i) => String(new Date().getFullYear() + i));
+
   readonly documentTypes: { value: CustomerDocumentType; label: string }[] = [
     { value: 'cc', label: 'Cédula de ciudadanía' },
     { value: 'ce', label: 'Cédula de extranjería' },
@@ -53,6 +71,15 @@ export class CheckoutComponent implements OnInit {
     payment: this.fb.group({
       method: this.fb.nonNullable.control<PaymentMethod>('pse', Validators.required),
       cardBrand: this.fb.control<CardBrand | null>(null),
+      // PSE simulation fields
+      pseBank: ['', Validators.required],
+      pseAccountHolder: ['', [Validators.required, Validators.minLength(3)]],
+      // Card simulation fields
+      cardNumber: [''],
+      nameOnCard: [''],
+      expiryMonth: [''],
+      expiryYear: [''],
+      cvv: [''],
     }),
   });
 
@@ -70,15 +97,17 @@ export class CheckoutComponent implements OnInit {
 
     this.form.controls.payment.controls.method.valueChanges.subscribe((method) => {
       this.paymentMethod.set(method);
-      const brandControl = this.form.controls.payment.controls.cardBrand;
-      if (method === 'card') {
-        brandControl.setValidators([Validators.required]);
-      } else {
-        brandControl.clearValidators();
-        brandControl.setValue(null);
-      }
-      brandControl.updateValueAndValidity();
+      this.resetPaymentSimulationFields();
+      this.applyPaymentValidators(method);
     });
+  }
+
+  formatCardNumber(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const digits = input.value.replace(/\D/g, '').slice(0, 16);
+    const formatted = digits.replace(/(.{4})/g, '$1 ').trim();
+    input.value = formatted;
+    this.form.controls.payment.controls.cardNumber.setValue(formatted, { emitEvent: false });
   }
 
   async submitOrder() {
@@ -87,18 +116,27 @@ export class CheckoutComponent implements OnInit {
     this.submitSuccess.set('');
 
     if (this.form.invalid) {
-      this.submitError.set('Completa los datos del comprador, entrega y pago antes de continuar.');
+      this.submitError.set('Completa todos los datos requeridos antes de continuar.');
       return;
     }
 
-    const payload = this.form.getRawValue() as CheckoutPayload;
+    const raw = this.form.getRawValue();
+    const payload: CheckoutPayload = {
+      customer: raw.customer as CheckoutPayload['customer'],
+      shipping: raw.shipping as CheckoutPayload['shipping'],
+      payment: {
+        method: raw.payment.method,
+        ...(raw.payment.cardBrand ? { cardBrand: raw.payment.cardBrand as CardBrand } : {}),
+      },
+    };
+
     this.submitting.set(true);
     try {
       await this.orderService.checkout(payload);
       this.cartService.clearLocal();
       await this.cartService.loadCart();
-      this.submitSuccess.set('Pedido creado correctamente.');
-      await this.router.navigate(['/carrito']);
+      this.submitSuccess.set('Pago procesado y pedido creado correctamente. Redirigiendo...');
+      await this.router.navigate(['/orders']);
     } catch (err: unknown) {
       let msg = 'No se pudo completar el checkout.';
       if (typeof err === 'object' && err !== null) {
@@ -106,12 +144,43 @@ export class CheckoutComponent implements OnInit {
         if ('error' in e && typeof e['error'] === 'object' && e['error'] !== null && 'message' in (e['error'] as Record<string, unknown>)) {
           msg = ((e['error'] as Record<string, unknown>)['message'] as string);
         } else if ('message' in e) {
-          msg = (e['message'] as string);
+          msg = e['message'] as string;
         }
       }
       this.submitError.set(msg);
     } finally {
       this.submitting.set(false);
     }
+  }
+
+  private resetPaymentSimulationFields(): void {
+    const p = this.form.controls.payment.controls;
+    p.cardBrand.setValue(null);
+    p.pseBank.setValue('');
+    p.pseAccountHolder.setValue('');
+    p.cardNumber.setValue('');
+    p.nameOnCard.setValue('');
+    p.expiryMonth.setValue('');
+    p.expiryYear.setValue('');
+    p.cvv.setValue('');
+    [p.cardBrand, p.pseBank, p.pseAccountHolder, p.cardNumber, p.nameOnCard, p.expiryMonth, p.expiryYear, p.cvv]
+      .forEach(c => c.clearValidators());
+  }
+
+  private applyPaymentValidators(method: PaymentMethod): void {
+    const p = this.form.controls.payment.controls;
+    if (method === 'card') {
+      p.cardBrand.setValidators([Validators.required]);
+      p.cardNumber.setValidators([Validators.required, Validators.minLength(19)]);
+      p.nameOnCard.setValidators([Validators.required, Validators.minLength(3)]);
+      p.expiryMonth.setValidators([Validators.required]);
+      p.expiryYear.setValidators([Validators.required]);
+      p.cvv.setValidators([Validators.required, Validators.minLength(3), Validators.maxLength(4)]);
+    } else {
+      p.pseBank.setValidators([Validators.required]);
+      p.pseAccountHolder.setValidators([Validators.required, Validators.minLength(3)]);
+    }
+    [p.cardBrand, p.pseBank, p.pseAccountHolder, p.cardNumber, p.nameOnCard, p.expiryMonth, p.expiryYear, p.cvv]
+      .forEach(c => c.updateValueAndValidity());
   }
 }
