@@ -56,6 +56,8 @@ export class Order {
     public readonly checkoutDetails?: OrderCheckoutDetails,
     public status: OrderStatus = 'pending',
     statusHistory?: OrderStatusChange[],
+    public orderNumber?: number,
+    public createdAt?: Date,
   ) {
     if (statusHistory) {
       this.statusHistory = statusHistory;

@@ -57,7 +57,7 @@ export class MongooseCartRepository implements ICartRepository {
             total: cart.total,
           },
         },
-        { upsert: true, new: true },
+        { upsert: true, returnDocument: 'after' },
       )
       .exec();
   }

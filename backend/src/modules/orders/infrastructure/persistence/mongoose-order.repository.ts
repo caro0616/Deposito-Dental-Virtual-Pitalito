@@ -74,8 +74,8 @@ export class MongooseOrderRepository implements IOrderRepository {
       await this.orderModel
         .findByIdAndUpdate(
           order.id,
-          { $set: { status: order.status, statusHistory, updatedAt: new Date() } },
-          { new: true },
+          { $set: { status: order.status, statusHistory, updatedAt: new Date(), orderNumber: order.orderNumber } },
+          { returnDocument: 'after' },
         )
         .exec();
     } else {
@@ -90,6 +90,8 @@ export class MongooseOrderRepository implements IOrderRepository {
         payment: order.checkoutDetails?.payment,
         status: order.status,
         statusHistory,
+        orderNumber: order.orderNumber,
+        createdAt: order.createdAt || new Date(),
       });
       (order as { id: string }).id = (created._id as Types.ObjectId).toHexString();
     }
@@ -145,6 +147,8 @@ export class MongooseOrderRepository implements IOrderRepository {
       checkoutDetails,
       doc.status as OrderStatus,
       statusHistory,
+      doc.orderNumber,
+      doc.createdAt,
     );
   }
 }

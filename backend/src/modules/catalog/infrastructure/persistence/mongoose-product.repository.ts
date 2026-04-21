@@ -97,7 +97,7 @@ export class MongooseProductRepository implements IProductRepository {
     };
 
     if (Types.ObjectId.isValid(product.id)) {
-      await this.productModel.findByIdAndUpdate(product.id, { $set: data }, { new: true }).exec();
+      await this.productModel.findByIdAndUpdate(product.id, { $set: data }, { returnDocument: 'after' }).exec();
     } else {
       const created = await this.productModel.create(data);
       (product as { id: string }).id = (created._id as Types.ObjectId).toHexString();
@@ -116,7 +116,7 @@ export class MongooseProductRepository implements IProductRepository {
       .findOneAndUpdate(
         { _id: id, stock: { $gte: quantity } },
         { $inc: { stock: -quantity } },
-        { new: true },
+        { returnDocument: 'after' },
       )
       .exec();
     return result !== null;

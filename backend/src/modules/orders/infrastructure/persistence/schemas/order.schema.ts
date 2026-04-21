@@ -109,6 +109,7 @@ export type OrderDocument = OrderDoc & Document;
 
 const ORDER_STATUSES: OrderStatus[] = ['pending', 'paid', 'shipped', 'delivered', 'cancelled'];
 
+
 @Schema({
   collection: 'orders',
   versionKey: false,
@@ -144,7 +145,13 @@ export class OrderDoc {
   @Prop({ type: [OrderStatusChangeSubdocSchema], default: [] })
   statusHistory!: OrderStatusChangeSubdoc[];
 
+  @Prop({ required: true, unique: true })
+  orderNumber!: number;
+
+  @Prop({ type: Date })
   createdAt?: Date;
+
+  @Prop({ type: Date })
   updatedAt?: Date;
 }
 

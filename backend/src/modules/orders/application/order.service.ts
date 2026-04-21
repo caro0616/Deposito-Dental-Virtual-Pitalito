@@ -53,6 +53,14 @@ export class OrderService {
       throw new BadRequestException(`Stock insuficiente para: ${outOfStock.join(', ')}`);
     }
 
+    // Obtener el último orderNumber y sumar 1
+    let lastOrderNumber = 0;
+    const allOrders = await this.orderRepository.findAll();
+    if (allOrders.length > 0) {
+      lastOrderNumber = Math.max(...allOrders.map(o => o.orderNumber || 0));
+    }
+    const newOrderNumber = lastOrderNumber + 1;
+
     const order = new Order(
       randomUUID(),
       userId,
@@ -66,6 +74,9 @@ export class OrderService {
       cart.total,
       checkoutDetails,
       'pending',
+      undefined,
+      newOrderNumber,
+      new Date(),
     );
 
     for (const item of cart.items) {
