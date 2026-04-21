@@ -35,17 +35,12 @@ export class OrderService {
     private readonly userService: UserService,
   ) {}
 
-  /**
-   * US-10: finalizar compra.
-   * Valida stock, crea la orden, decrementa inventario y vacía el carrito.
-   */
   async checkout(userId: string, checkoutDetails: OrderCheckoutDetails): Promise<Order> {
     const cart = await this.cartRepository.findByUserId(userId);
     if (!cart || cart.items.length === 0) {
       throw new BadRequestException('El carrito está vacío');
     }
 
-    // Validar stock para todos los ítems antes de crear la orden
     const outOfStock: string[] = [];
     for (const item of cart.items) {
       const product = await this.productRepository.findById(item.productId);
@@ -73,7 +68,6 @@ export class OrderService {
       'pending',
     );
 
-    // Decrementar stock atómicamente por cada ítem
     for (const item of cart.items) {
       const success = await this.productRepository.decreaseStockAtomic(
         item.productId,
@@ -81,14 +75,13 @@ export class OrderService {
       );
       if (!success) {
         this.logger.warn(
-          `No se pudo decrementar stock del producto ${item.productId} — puede haber race condition`,
+          `No se pudo decrementar stock del producto ${item.productId}`,
         );
       }
     }
 
     await this.orderRepository.save(order);
 
-    // Vaciar carrito tras checkout exitoso
     cart.items = [];
     cart.total = 0;
     await this.cartRepository.save(cart);
@@ -96,23 +89,14 @@ export class OrderService {
     return order;
   }
 
-  /** US-24: listar todas las órdenes (admin) */
   async listAll(): Promise<Order[]> {
     return this.orderRepository.findAll();
   }
 
-  /**
-   * US-10: historial de órdenes del usuario autenticado.
-   * Devuelve las órdenes ordenadas de más reciente a más antigua.
-   */
   async getUserOrders(userId: string): Promise<Order[]> {
     return this.orderRepository.findByUserId(userId);
   }
 
-  /**
-   * US-24: cambiar estado de una orden.
-   * Mantiene historial completo de cambios.
-   */
   async updateStatus(orderId: string, status: OrderStatus, adminId: string): Promise<Order> {
     const order = await this.orderRepository.findById(orderId);
     if (!order) {
@@ -122,24 +106,20 @@ export class OrderService {
     order.changeStatus(status, adminId);
     await this.orderRepository.save(order);
 
-    // Notificar al cliente por correo
     try {
       const user = await this.userService.findById(order.userId);
       if (user && user.email) {
         const subject = `Actualización de tu pedido: ${status}`;
-        const text = `Hola ${user.name},\n\nEl estado de tu pedido ha cambiado a: ${status}.\n\nGracias por comprar en Dental Pitalito.`;
+        const text = `Hola ${user.name},\n\nEl estado de tu pedido ha cambiado a: ${status}.`;
         await this.mailService.sendOrderStatusUpdate(user.email, subject, text);
       }
     } catch (e) {
-      this.logger.error('No se pudo enviar el correo de actualización de pedido', e);
+      this.logger.error('No se pudo enviar el correo', e);
     }
 
     return order;
   }
 
-  /**
-   * US-15: obtener una orden específica del usuario
-   */
   async getOrderById(orderId: string, userId: string): Promise<Order> {
     const order = await this.orderRepository.findById(orderId);
 
@@ -150,9 +130,7 @@ export class OrderService {
     return order;
   }
 
-  /**
-   * Mejora #34: reordenar pedido (volver a agregar productos al carrito)
-   */
+  // 🔥 FIX AQUÍ
   async reorder(orderId: string, userId: string): Promise<void> {
     const order = await this.orderRepository.findById(orderId);
 
@@ -160,10 +138,9 @@ export class OrderService {
       throw new NotFoundException('Orden no encontrada');
     }
 
-    const cart = await this.cartRepository.findByUserId(userId);
+    let cart = await this.cartRepository.findByUserId(userId);
 
     if (!cart) {
-      // si no existe carrito, puedes crearlo según tu implementación
       throw new BadRequestException('Carrito no encontrado');
     }
 
@@ -172,16 +149,19 @@ export class OrderService {
 
       if (!product || product.stock < item.quantity) {
         this.logger.warn(`Producto sin stock en reorden: ${item.name}`);
-        continue; // no rompe todo, solo ignora ese producto
+        continue;
       }
 
-      await this.cartRepository.addItem(userId, {
-        productId: item.productId,
-        name: item.name,
-        unitPrice: item.unitPrice,
-        quantity: item.quantity,
-        subtotal: item.subtotal,
-      });
+      // ✅ USAR LA ENTIDAD (NO EL REPO)
+      cart.addItem(
+    item.productId,
+    item.name,
+    item.unitPrice,
+    item.quantity,
+);
     }
+
+    // ✅ GUARDAR AL FINAL
+    await this.cartRepository.save(cart);
   }
 }

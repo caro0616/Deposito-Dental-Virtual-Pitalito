@@ -11,7 +11,7 @@ export interface ICartRepository {
   save(cart: Cart): Promise<void>;
 }
 
-// ─── In-memory implementation (kept for unit tests / local dev without DB) ────
+// ─── In-memory implementation (for testing / dev without DB) ───
 
 export class InMemoryCartRepository implements ICartRepository {
   private readonly carts = new Map<string, Cart>();
