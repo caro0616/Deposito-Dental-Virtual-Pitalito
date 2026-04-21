@@ -71,4 +71,23 @@ export class OrdersController {
     const adminId = this.extractHeader(headers, 'x-admin-id');
     return this.orderService.updateStatus(id, body.status, adminId);
   }
+
+  /**
+   * US-15: ver una orden específica
+   */
+  @Get('orders/:id')
+  async getOrderById(@Headers() headers: Record<string, string>, @Param('id') id: string) {
+    const userId = this.extractHeader(headers, 'x-user-id');
+    return this.orderService.getOrderById(id, userId);
+  }
+
+  /**
+   * Mejora #34: reordenar pedido
+   */
+  @Post('orders/:id/reorder')
+  async reorder(@Headers() headers: Record<string, string>, @Param('id') id: string) {
+    const userId = this.extractHeader(headers, 'x-user-id');
+    await this.orderService.reorder(id, userId);
+    return { message: 'Productos agregados al carrito' };
+  }
 }

@@ -1,0 +1,43 @@
+<div class="orders-container">
+  <h2>Mis Pedidos</h2>
+
+  @if (loading()) {
+    <div class="loading">Cargando pedidos...</div>
+  }
+
+  @if (!loading() && orders().length === 0) {
+    <div class="empty">
+      No tienes pedidos aún 🦷
+    </div>
+  }
+
+  @for (order of orders(); track order.id) {
+    <div class="order-card">
+      <div class="order-header">
+        <span><strong>ID:</strong> {{ order.id }}</span>
+        <span 
+          class="status"
+          [style.background]="getStatusColor(order.status)">
+          {{ getStatusLabel(order.status) }}
+        </span>
+      </div>
+
+      <div class="order-items">
+        @for (item of order.items; track item.productId) {
+          <div class="item">
+            <span>{{ item.name }}</span>
+            <span>x{{ item.quantity }}</span>
+            <span>${{ item.subtotal }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="order-footer">
+        <strong>Total: ${{ order.total }}</strong>
+        <button (click)="reorder(order.id)">
+          🔁 Reordenar
+        </button>
+      </div>
+    </div>
+  }
+</div>

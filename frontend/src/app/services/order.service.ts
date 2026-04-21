@@ -12,7 +12,7 @@ export class OrderService {
   private _orders = signal<Order[]>([]);
   private _loading = signal(false);
 
-  readonly orders  = this._orders.asReadonly();
+  readonly orders = this._orders.asReadonly();
   readonly loading = this._loading.asReadonly();
 
   // ── Checkout (crear orden desde carrito) ───────────────
@@ -84,5 +84,22 @@ export class OrderService {
       cancelled: '#E8524A',
     };
     return colors[status] ?? '#8AACBC';
+  }
+
+  // ── Obtener una orden específica ─────────────────────
+  async getOrderById(orderId: string): Promise<Order> {
+    return firstValueFrom(
+      this.http.get<Order>(`${this.api}/orders/${orderId}`)
+    );
+  }
+
+  // ── Reordenar pedido ────────────────────────────────
+  async reorder(orderId: string): Promise<void> {
+    await firstValueFrom(
+      this.http.post(`${this.api}/orders/${orderId}/reorder`, {})
+    );
+
+    // opcional: recargar carrito o pedidos
+    await this.loadMyOrders();
   }
 }

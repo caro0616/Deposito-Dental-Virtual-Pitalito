@@ -136,4 +136,52 @@ export class OrderService {
 
     return order;
   }
+
+  /**
+   * US-15: obtener una orden específica del usuario
+   */
+  async getOrderById(orderId: string, userId: string): Promise<Order> {
+    const order = await this.orderRepository.findById(orderId);
+
+    if (!order || order.userId !== userId) {
+      throw new NotFoundException('Orden no encontrada');
+    }
+
+    return order;
+  }
+
+  /**
+   * Mejora #34: reordenar pedido (volver a agregar productos al carrito)
+   */
+  async reorder(orderId: string, userId: string): Promise<void> {
+    const order = await this.orderRepository.findById(orderId);
+
+    if (!order || order.userId !== userId) {
+      throw new NotFoundException('Orden no encontrada');
+    }
+
+    const cart = await this.cartRepository.findByUserId(userId);
+
+    if (!cart) {
+      // si no existe carrito, puedes crearlo según tu implementación
+      throw new BadRequestException('Carrito no encontrado');
+    }
+
+    for (const item of order.items) {
+      const product = await this.productRepository.findById(item.productId);
+
+      if (!product || product.stock < item.quantity) {
+        this.logger.warn(`Producto sin stock en reorden: ${item.name}`);
+        continue; // no rompe todo, solo ignora ese producto
+      }
+
+      await this.cartRepository.addItem(userId, {
+        productId: item.productId,
+        name: item.name,
+        unitPrice: item.unitPrice,
+        quantity: item.quantity,
+        subtotal: item.subtotal,
+      });
+    }
+  }
 }

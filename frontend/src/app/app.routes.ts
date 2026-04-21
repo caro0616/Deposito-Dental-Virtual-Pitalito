@@ -19,5 +19,10 @@ export const routes: Routes = [
   { path: 'auth', component: AuthComponent, title: 'Inicia sesión – Dental Edna Pitalito' },
   { path: 'diagnostico', component: DiagnosticoComponent, title: 'Diagnóstico API – Dental Edna Pitalito' },
   { path: 'admin', component: AdminPanelComponent, title: 'Panel de Administración' },
-  { path: '**', redirectTo: '' }
+  {
+    path: 'orders',
+    loadComponent: () =>
+      import('./pages/orders/orders.component').then((m) => m.OrdersComponent),
+  },
+  { path: '**', redirectTo: '' },
 ];
