@@ -102,8 +102,6 @@ export class OrderPaymentSubdoc {
 }
 export const OrderPaymentSubdocSchema = SchemaFactory.createForClass(OrderPaymentSubdoc);
 
-export const OrderPaymentSubdocSchema = SchemaFactory.createForClass(OrderPaymentSubdoc);
-
 // ─── Order document ───────────────────────────────────────────────────────────
 
 export type OrderDocument = OrderDoc & Document;
