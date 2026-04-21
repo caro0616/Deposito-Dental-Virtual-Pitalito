@@ -99,9 +99,9 @@ export class OrderPaymentSubdoc {
 
   @Prop({ type: String, enum: CARD_BRANDS })
   cardBrand?: CardBrand;
+
 }
 export const OrderPaymentSubdocSchema = SchemaFactory.createForClass(OrderPaymentSubdoc);
-
 // ─── Order document ───────────────────────────────────────────────────────────
 
 export type OrderDocument = OrderDoc & Document;
