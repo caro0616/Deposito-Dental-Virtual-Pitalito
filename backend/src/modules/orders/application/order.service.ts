@@ -74,9 +74,7 @@ export class OrderService {
         item.quantity,
       );
       if (!success) {
-        this.logger.warn(
-          `No se pudo decrementar stock del producto ${item.productId}`,
-        );
+        this.logger.warn(`No se pudo decrementar stock del producto ${item.productId}`);
       }
     }
 
@@ -138,7 +136,7 @@ export class OrderService {
       throw new NotFoundException('Orden no encontrada');
     }
 
-    let cart = await this.cartRepository.findByUserId(userId);
+    const cart = await this.cartRepository.findByUserId(userId);
 
     if (!cart) {
       throw new BadRequestException('Carrito no encontrado');
@@ -153,12 +151,7 @@ export class OrderService {
       }
 
       // ✅ USAR LA ENTIDAD (NO EL REPO)
-      cart.addItem(
-    item.productId,
-    item.name,
-    item.unitPrice,
-    item.quantity,
-);
+      cart.addItem(item.productId, item.name, item.unitPrice, item.quantity);
     }
 
     // ✅ GUARDAR AL FINAL
