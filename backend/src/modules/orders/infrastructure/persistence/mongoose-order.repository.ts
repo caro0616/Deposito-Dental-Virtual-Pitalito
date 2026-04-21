@@ -74,7 +74,14 @@ export class MongooseOrderRepository implements IOrderRepository {
       await this.orderModel
         .findByIdAndUpdate(
           order.id,
-          { $set: { status: order.status, statusHistory, updatedAt: new Date(), orderNumber: order.orderNumber } },
+          {
+            $set: {
+              status: order.status,
+              statusHistory,
+              updatedAt: new Date(),
+              orderNumber: order.orderNumber,
+            },
+          },
           { returnDocument: 'after' },
         )
         .exec();

@@ -57,7 +57,7 @@ export class OrderService {
     let lastOrderNumber = 0;
     const allOrders = await this.orderRepository.findAll();
     if (allOrders.length > 0) {
-      lastOrderNumber = Math.max(...allOrders.map(o => o.orderNumber || 0));
+      lastOrderNumber = Math.max(...allOrders.map((o) => o.orderNumber || 0));
     }
     const newOrderNumber = lastOrderNumber + 1;
 
