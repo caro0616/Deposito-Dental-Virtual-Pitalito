@@ -181,8 +181,19 @@
   font-size: 0.9rem;
 }
 
+.payment-brand--active {
+  border-color: #009fe3;
+  box-shadow: inset 0 0 0 1px rgba(0, 159, 227, 0.25);
+}
+
 .payment-brands {
   margin-top: 1rem;
+}
+
+.checkout-field-error {
+  margin: 0.5rem 0 0;
+  font-size: 0.88rem;
+  color: #b5453c;
 }
 
 .checkout-summary {
@@ -243,6 +254,12 @@
   background: #fff2f0;
   color: #b5453c;
   border: 1px solid #f1c0ba;
+}
+
+.checkout-message--success {
+  background: #f0fff4;
+  color: #276749;
+  border: 1px solid #9ae6b4;
 }
 
 .checkout-empty {

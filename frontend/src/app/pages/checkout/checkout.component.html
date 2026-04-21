@@ -117,17 +117,23 @@
           @if (paymentMethod() === 'card') {
             <div class="checkout-grid checkout-grid--3 payment-brands">
               @for (brand of cardBrands; track brand) {
-                <label class="payment-brand">
+                <label class="payment-brand" [class.payment-brand--active]="form.controls.payment.controls.cardBrand.value === brand">
                   <input type="radio" formControlName="cardBrand" [value]="brand" />
                   <span>{{ brand === 'mastercard' ? 'Mastercard' : brand === 'amex' ? 'American Express' : 'Visa' }}</span>
                 </label>
               }
             </div>
+            @if (form.controls.payment.controls.cardBrand.invalid && form.controls.payment.controls.cardBrand.touched) {
+              <p class="checkout-field-error">Selecciona la marca de tu tarjeta.</p>
+            }
           }
         </section>
 
         @if (submitError()) {
           <p class="checkout-message checkout-message--error">{{ submitError() }}</p>
+        }
+        @if (submitSuccess()) {
+          <p class="checkout-message checkout-message--success">{{ submitSuccess() }}</p>
         }
       </form>
 

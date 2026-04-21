@@ -97,8 +97,8 @@ export class CheckoutComponent implements OnInit {
       await this.orderService.checkout(payload);
       this.cartService.clearLocal();
       await this.cartService.loadCart();
-      this.submitSuccess.set('Pedido creado correctamente.');
-      await this.router.navigate(['/carrito']);
+      this.submitSuccess.set('Pedido creado correctamente. Redirigiendo...');
+      await this.router.navigate(['/orders']);
     } catch (err: unknown) {
       let msg = 'No se pudo completar el checkout.';
       if (typeof err === 'object' && err !== null) {
