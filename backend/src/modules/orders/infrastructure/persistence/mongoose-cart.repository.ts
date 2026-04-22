@@ -31,6 +31,30 @@ export class MongooseCartRepository implements ICartRepository {
     return this.toDomain(doc);
   }
 
+  async getOrCreateByUserId(userId: string): Promise<Cart> {
+    if (!Types.ObjectId.isValid(userId)) {
+      return new Cart('', userId, [], 0);
+    }
+
+    const userObjectId = new Types.ObjectId(userId);
+    const doc = await this.cartModel
+      .findOneAndUpdate(
+        { userId: userObjectId },
+        {
+          $setOnInsert: {
+            userId: userObjectId,
+            items: [],
+            total: 0,
+          },
+        },
+        { upsert: true, returnDocument: 'after' },
+      )
+      .lean<CartDoc & { _id: Types.ObjectId }>()
+      .exec();
+
+    return this.toDomain(doc);
+  }
+
   async save(cart: Cart): Promise<void> {
     const items: CartItemSubdoc[] = cart.items.map((item) => {
       const subdoc = new CartItemSubdoc();

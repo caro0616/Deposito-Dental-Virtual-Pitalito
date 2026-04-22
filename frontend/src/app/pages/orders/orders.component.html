@@ -1,5 +1,34 @@
 <div class="orders-container">
-  <h2>Mis Pedidos</h2>
+  <header class="orders-header">
+    <h2>Mis Pedidos</h2>
+    <p>Consulta y gestiona todos tus pedidos realizados.</p>
+  </header>
+
+  @if (reorderError) {
+    <div class="reorder-feedback reorder-feedback--error" role="alert">
+      <p class="reorder-feedback__title">No pudimos reordenar este pedido</p>
+      <p class="reorder-feedback__description">{{ reorderError }}</p>
+    </div>
+  }
+
+  @if (reorderResult) {
+    <div class="reorder-feedback" [class.reorder-feedback--warning]="reorderResult.summary.skippedItems > 0" role="status" aria-live="polite">
+      <p class="reorder-feedback__title">{{ getReorderFeedbackTitle() }}</p>
+      <p class="reorder-feedback__description">{{ getReorderFeedbackDescription() }}</p>
+      @if (reorderResult.skippedItems.length > 0) {
+        <p class="reorder-feedback__subtitle">Productos no agregados</p>
+        <ul>
+          @for (item of reorderResult.skippedItems; track item.productId) {
+            <li>{{ item.name }} — {{ getReorderReasonLabel(item) }}</li>
+          }
+        </ul>
+      }
+      <div class="reorder-feedback__actions">
+        <a routerLink="/carrito">Ir al carrito para modificar</a>
+        <a routerLink="/catalogo">Seguir comprando</a>
+      </div>
+    </div>
+  }
 
   @if (loading()) {
     <div class="loading">Cargando pedidos...</div>
@@ -20,6 +49,29 @@
         </div>
       }
     <div class="order-card">
+      <div class="order-main">
+        <div class="order-info">
+          <div class="order-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M6 8h12l-1 11H7L6 8Z"/>
+              <path d="M9 8V6a3 3 0 0 1 6 0v2"/>
+            </svg>
+          </div>
+          <div class="order-meta">
+            <h3>Pedido #{{ order.id.slice(0, 10) }}</h3>
+            <p class="order-date">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              {{ order.createdAt ? (order.createdAt | date:'dd/MM/yyyy HH:mm') : '—' }}
+            </p>
+          </div>
+        </div>
+
+        <span class="status" [style.background]="getStatusColor(order.status)">
       <div class="order-header">
         <span><strong>ID de pedido:</strong> {{ order.id.slice(0, 8) }}</span>
         <span><strong>Fecha:</strong> {{ order.createdAt ? (order.createdAt | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
@@ -30,20 +82,23 @@
         </span>
       </div>
 
-      <div class="order-description">
-        <strong>Descripción:</strong>
-        <span>
-          @for (item of order.items; track item.productId) {
-            {{ item.name }} (x{{ item.quantity }})@if (!isLast(order.items, item)) {, }
-          }
-        </span>
-      </div>
+      <div class="order-content">
+        <div class="order-products">
+          <p class="order-products__title">Productos ({{ order.items.length }})</p>
+          <ul>
+            @for (item of order.items; track item.productId) {
+              <li>{{ item.name }} (x{{ item.quantity }})</li>
+            }
+          </ul>
+        </div>
 
-      <div class="order-footer">
-        <strong>Total: ${{ order.total }}</strong>
-        <button (click)="reorder(order.id)">
-          🔁 Reordenar
-        </button>
+        <div class="order-aside">
+          <p class="order-total-label">Total</p>
+          <strong class="order-total">${{ order.total | number:'1.0-0' }}</strong>
+          <button (click)="reorder(order.id)" [disabled]="reorderingOrderId === order.id">
+            {{ reorderingOrderId === order.id ? 'Reordenando...' : 'Reordenar' }}
+          </button>
+        </div>
       </div>
     </div>
   }

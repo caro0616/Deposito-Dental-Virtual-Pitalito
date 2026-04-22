@@ -115,10 +115,15 @@
               }
             </div>
             <div class="order-card__footer">
-              <span class="order-card__total">$ {{ order.total | number:'1.0-0' }}</span>
-              @if (order.statusHistory.length) {
-                <span class="order-card__date">{{ formatDate(order.statusHistory[0].changedAt) }}</span>
-              }
+              <div class="order-card__meta">
+                <span class="order-card__total">$ {{ order.total | number:'1.0-0' }}</span>
+                @if (order.statusHistory.length) {
+                  <span class="order-card__date">{{ formatDate(order.statusHistory[0].changedAt) }}</span>
+                }
+              </div>
+              <button class="order-card__view-btn" (click)="openOrderHistory()">
+                Ver compra
+              </button>
             </div>
           </div>
         }

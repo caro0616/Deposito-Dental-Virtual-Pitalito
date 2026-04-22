@@ -282,6 +282,14 @@
 
   &__footer {
     @include m.flex-between;
+    gap: v.$sp-3;
+    align-items: center;
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    gap: v.$sp-1;
   }
 
   &__total {
@@ -294,6 +302,24 @@
   &__date {
     font-size: v.$text-sm;
     color: v.$secondary-light;
+  }
+
+  &__view-btn {
+    border: 1px solid v.$border-strong;
+    background: v.$white;
+    color: v.$secondary;
+    border-radius: v.$radius-md;
+    font-size: v.$text-sm;
+    font-weight: v.$fw-semibold;
+    padding: v.$sp-2 v.$sp-3;
+    cursor: pointer;
+    transition: all v.$tr-fast;
+
+    &:hover {
+      border-color: v.$primary;
+      color: v.$primary;
+      background: v.$primary-light;
+    }
   }
 }
 
