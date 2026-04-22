@@ -69,7 +69,9 @@ export class MailService {
     }
     const createdAt = payload.createdAt.toLocaleString('es-CO');
     const safeCustomerName = this.escapeHtml(payload.customerName);
-    const lines = payload.items.map((item) => `- ${item.name} x${item.quantity}: $${item.subtotal}`);
+    const lines = payload.items.map(
+      (item) => `- ${item.name} x${item.quantity}: $${item.subtotal}`,
+    );
     const text = [
       `Hola ${payload.customerName},`,
       '',
