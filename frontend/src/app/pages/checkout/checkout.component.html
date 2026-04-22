@@ -9,10 +9,29 @@
   </div>
 
   @if (submitSuccess()) {
-    <div class="checkout-success-modal">
+    <div class="checkout-success-modal" role="dialog" aria-modal="true" aria-live="polite">
       <div class="checkout-success-modal__content">
-        <h2>¡Pago exitoso!</h2>
-        <p>Tu pedido ha sido registrado correctamente.</p>
+        <div class="checkout-success-modal__icon" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </div>
+        <p class="checkout-success-modal__kicker">Pago confirmado</p>
+        <h2>Tu compra fue exitosa</h2>
+        <p class="checkout-success-modal__description">Registramos tu pedido y estamos preparando el despacho.</p>
+        @if (confirmedOrder()?.orderNumber) {
+          <div class="checkout-success-modal__info-row">
+            <span>Número de pedido</span>
+            <strong>#{{ confirmedOrder()?.orderNumber }}</strong>
+          </div>
+        }
+        @if (confirmedOrder()?.checkoutDetails?.customer?.email) {
+          <div class="checkout-success-modal__info-row">
+            <span>Confirmación enviada a</span>
+            <strong>{{ confirmedOrder()?.checkoutDetails?.customer?.email }}</strong>
+          </div>
+        }
+        <p class="checkout-success-modal__redirect">Te llevaremos a “Mis pedidos” en unos segundos...</p>
       </div>
     </div>
   }

@@ -13,6 +13,7 @@ import { MongooseCartRepository } from './infrastructure/persistence/mongoose-ca
 import { MongooseOrderRepository } from './infrastructure/persistence/mongoose-order.repository';
 
 import { CartDoc, CartSchema } from './infrastructure/persistence/schemas/cart.schema';
+import { CounterDoc, CounterSchema } from './infrastructure/persistence/schemas/counter.schema';
 import { OrderDoc, OrderSchema } from './infrastructure/persistence/schemas/order.schema';
 
 import { CartController } from './presentation/cart.controller';
@@ -24,6 +25,7 @@ import { CatalogModule } from '../catalog/catalog.module';
   imports: [
     MongooseModule.forFeature([
       { name: CartDoc.name, schema: CartSchema },
+      { name: CounterDoc.name, schema: CounterSchema },
       { name: OrderDoc.name, schema: OrderSchema },
     ]),
     // CatalogModule exporta PRODUCT_REPOSITORY — necesario en CartService y OrderService
