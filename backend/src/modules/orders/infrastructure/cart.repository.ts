@@ -8,6 +8,7 @@ export const CART_REPOSITORY = Symbol('ICartRepository');
 
 export interface ICartRepository {
   findByUserId(userId: string): Promise<Cart | null>;
+  getOrCreateByUserId(userId: string): Promise<Cart>;
   save(cart: Cart): Promise<void>;
 }
 
@@ -18,6 +19,15 @@ export class InMemoryCartRepository implements ICartRepository {
 
   async findByUserId(userId: string): Promise<Cart | null> {
     return this.carts.get(userId) ?? null;
+  }
+
+  async getOrCreateByUserId(userId: string): Promise<Cart> {
+    const existing = await this.findByUserId(userId);
+    if (existing) return existing;
+
+    const created = new Cart('', userId, [], 0);
+    this.carts.set(userId, created);
+    return created;
   }
 
   async save(cart: Cart): Promise<void> {
@@ -31,5 +41,6 @@ export class InMemoryCartRepository implements ICartRepository {
  */
 export abstract class CartRepository implements ICartRepository {
   abstract findByUserId(userId: string): Promise<Cart | null>;
+  abstract getOrCreateByUserId(userId: string): Promise<Cart>;
   abstract save(cart: Cart): Promise<void>;
 }

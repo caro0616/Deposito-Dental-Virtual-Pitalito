@@ -5,7 +5,13 @@ import { Router, RouterModule } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 import { OrderService } from '../../services/order.service';
 import { AuthService } from '../../services/auth.service';
-import { CardBrand, CheckoutPayload, CustomerDocumentType, PaymentMethod } from '../../models/product.model';
+import {
+  CardBrand,
+  CheckoutPayload,
+  CustomerDocumentType,
+  Order,
+  PaymentMethod,
+} from '../../models/product.model';
 
 @Component({
   selector: 'app-checkout',
@@ -24,6 +30,7 @@ export class CheckoutComponent implements OnInit {
   readonly submitting = signal(false);
   readonly submitError = signal('');
   readonly submitSuccess = signal('');
+  readonly confirmedOrder = signal<Order | null>(null);
   readonly paymentMethod = signal<PaymentMethod>('pse');
 
   readonly cardBrands: CardBrand[] = ['visa', 'mastercard', 'amex'];
@@ -114,6 +121,7 @@ export class CheckoutComponent implements OnInit {
     this.form.markAllAsTouched();
     this.submitError.set('');
     this.submitSuccess.set('');
+    this.confirmedOrder.set(null);
 
     if (this.form.invalid) {
       this.submitError.set('Completa todos los datos requeridos antes de continuar.');
@@ -132,12 +140,15 @@ export class CheckoutComponent implements OnInit {
 
     this.submitting.set(true);
     try {
-      await this.orderService.checkout(payload);
+      const order = await this.orderService.checkout(payload);
+      this.confirmedOrder.set(order);
       this.cartService.clearLocal();
       await this.cartService.loadCart();
-      this.submitSuccess.set('¡Pago exitoso!');
+      const orderNumberText = order.orderNumber ? ` Pedido #${order.orderNumber} confirmado.` : '';
+      this.submitSuccess.set(`¡Pago exitoso!${orderNumberText}`);
       setTimeout(async () => {
         this.submitSuccess.set('');
+        this.confirmedOrder.set(null);
         await this.router.navigate(['/orders']);
       }, 2200);
     } catch (err: unknown) {
