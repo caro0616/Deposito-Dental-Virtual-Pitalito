@@ -116,8 +116,8 @@ export class OrderService {
       }
     } catch (e) {
       this.logger.warn(
-  `No se pudo enviar correo de confirmación para pedido #${order.orderNumber}`,
-);
+        `No se pudo enviar correo de confirmación para pedido #${order.orderNumber}`,
+      );
       this.logger.error('Detalle del error de correo de confirmación', e);
     }
 
@@ -152,7 +152,7 @@ export class OrderService {
         const text = `Hola ${user.name},\n\nEl estado de tu pedido ha cambiado a: ${status}.`;
         await this.mailService.sendOrderStatusUpdate(user.email, subject, text);
       }
-    } catch (e) {
+    } catch {
       this.logger.warn(
         `No se pudo enviar correo de confirmación para pedido #${order.orderNumber}`,
       );
