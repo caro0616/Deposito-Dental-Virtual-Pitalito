@@ -115,7 +115,9 @@ export class OrderService {
         });
       }
     } catch (e) {
-      this.logger.warn(`No se pudo enviar correo de confirmación para pedido #${order.orderNumber}`);
+      this.logger.warn(
+  `No se pudo enviar correo de confirmación para pedido #${order.orderNumber}`,
+);
       this.logger.error('Detalle del error de correo de confirmación', e);
     }
 
