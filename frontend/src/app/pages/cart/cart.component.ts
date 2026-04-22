@@ -64,4 +64,8 @@ export class CartComponent implements OnInit {
       });
     } catch { return String(dateVal); }
   }
+
+  openOrderHistory(): void {
+    this.router.navigate(['/orders']);
+  }
 }

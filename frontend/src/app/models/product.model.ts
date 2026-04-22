@@ -106,6 +106,40 @@ export interface Order {
   createdAt?: string | Date;
 }
 
+export type ReorderSkippedReason = 'out_of_stock' | 'not_found' | 'inactive';
+
+export interface ReorderAddedItem {
+  productId: string;
+  name: string;
+  requestedQuantity: number;
+  addedQuantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+export interface ReorderSkippedItem {
+  productId: string;
+  name: string;
+  requestedQuantity: number;
+  reason: ReorderSkippedReason;
+  availableStock?: number;
+}
+
+export interface ReorderSummary {
+  requestedItems: number;
+  addedItems: number;
+  skippedItems: number;
+  requestedUnits: number;
+  addedUnits: number;
+  skippedUnits: number;
+}
+
+export interface ReorderResponse {
+  addedItems: ReorderAddedItem[];
+  skippedItems: ReorderSkippedItem[];
+  summary: ReorderSummary;
+}
+
 // ── Auth ──────────────────────────────────────────────────
 export interface AuthResponse {
   token: string;

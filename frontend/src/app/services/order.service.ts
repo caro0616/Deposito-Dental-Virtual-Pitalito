@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { CheckoutPayload, Order } from '../models/product.model';
+import { CheckoutPayload, Order, ReorderResponse } from '../models/product.model';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -94,12 +94,12 @@ export class OrderService {
   }
 
   // ── Reordenar pedido ────────────────────────────────
-  async reorder(orderId: string): Promise<void> {
-    await firstValueFrom(
-      this.http.post(`${this.api}/orders/${orderId}/reorder`, {})
+  async reorder(orderId: string): Promise<ReorderResponse> {
+    const result = await firstValueFrom(
+      this.http.post<ReorderResponse>(`${this.api}/orders/${orderId}/reorder`, {})
     );
 
-    // opcional: recargar carrito o pedidos
     await this.loadMyOrders();
+    return result;
   }
 }

@@ -17,6 +17,11 @@ import {
 import { randomUUID } from 'crypto';
 import { MailService } from '../../../shared/mail.service';
 import { UserService } from '../../users/application/user.service';
+import {
+  ReorderResponseDto,
+  ReorderAddedItemDto,
+  ReorderSkippedItemDto,
+} from '../presentation/dto/reorder-response.dto';
 
 @Injectable()
 export class OrderService {
@@ -139,33 +144,79 @@ export class OrderService {
     return order;
   }
 
-  // 🔥 FIX AQUÍ
-  async reorder(orderId: string, userId: string): Promise<void> {
+  async reorder(orderId: string, userId: string): Promise<ReorderResponseDto> {
     const order = await this.orderRepository.findById(orderId);
 
     if (!order || order.userId !== userId) {
       throw new NotFoundException('Orden no encontrada');
     }
 
-    const cart = await this.cartRepository.findByUserId(userId);
-
-    if (!cart) {
-      throw new BadRequestException('Carrito no encontrado');
-    }
+    const cart = await this.cartRepository.getOrCreateByUserId(userId);
+    const addedItems: ReorderAddedItemDto[] = [];
+    const skippedItems: ReorderSkippedItemDto[] = [];
 
     for (const item of order.items) {
       const product = await this.productRepository.findById(item.productId);
 
-      if (!product || product.stock < item.quantity) {
-        this.logger.warn(`Producto sin stock en reorden: ${item.name}`);
+      if (!product) {
+        skippedItems.push({
+          productId: item.productId,
+          name: item.name,
+          requestedQuantity: item.quantity,
+          reason: 'not_found',
+        });
         continue;
       }
 
-      // ✅ USAR LA ENTIDAD (NO EL REPO)
-      cart.addItem(item.productId, item.name, item.unitPrice, item.quantity);
+      if (!product.active) {
+        skippedItems.push({
+          productId: item.productId,
+          name: product.name,
+          requestedQuantity: item.quantity,
+          reason: 'inactive',
+          availableStock: product.stock,
+        });
+        continue;
+      }
+
+      if (product.stock < item.quantity) {
+        skippedItems.push({
+          productId: item.productId,
+          name: product.name,
+          requestedQuantity: item.quantity,
+          reason: 'out_of_stock',
+          availableStock: product.stock,
+        });
+        continue;
+      }
+
+      cart.addItem(product.id, product.name, product.price, item.quantity);
+      addedItems.push({
+        productId: product.id,
+        name: product.name,
+        requestedQuantity: item.quantity,
+        addedQuantity: item.quantity,
+        unitPrice: product.price,
+        lineTotal: product.price * item.quantity,
+      });
     }
 
-    // ✅ GUARDAR AL FINAL
     await this.cartRepository.save(cart);
+
+    const requestedUnits = order.items.reduce((sum, item) => sum + item.quantity, 0);
+    const addedUnits = addedItems.reduce((sum, item) => sum + item.addedQuantity, 0);
+
+    return {
+      addedItems,
+      skippedItems,
+      summary: {
+        requestedItems: order.items.length,
+        addedItems: addedItems.length,
+        skippedItems: skippedItems.length,
+        requestedUnits,
+        addedUnits,
+        skippedUnits: requestedUnits - addedUnits,
+      },
+    };
   }
 }

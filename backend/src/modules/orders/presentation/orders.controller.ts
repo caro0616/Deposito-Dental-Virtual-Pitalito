@@ -11,6 +11,7 @@ import {
 import { OrderService } from '../application/order.service';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { CheckoutOrderDto } from './dto/checkout-order.dto';
+import { ReorderResponseDto } from './dto/reorder-response.dto';
 
 /**
  * Controlador de órdenes.
@@ -82,12 +83,14 @@ export class OrdersController {
   }
 
   /**
-   * Mejora #34: reordenar pedido
+   * US-14: reordenar pedido
    */
   @Post('orders/:id/reorder')
-  async reorder(@Headers() headers: Record<string, string>, @Param('id') id: string) {
+  async reorder(
+    @Headers() headers: Record<string, string>,
+    @Param('id') id: string,
+  ): Promise<ReorderResponseDto> {
     const userId = this.extractHeader(headers, 'x-user-id');
-    await this.orderService.reorder(id, userId);
-    return { message: 'Productos agregados al carrito' };
+    return this.orderService.reorder(id, userId);
   }
 }
