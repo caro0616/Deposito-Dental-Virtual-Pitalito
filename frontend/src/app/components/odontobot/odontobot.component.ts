@@ -1,4 +1,5 @@
 import { Component, signal, effect, inject, ElementRef, ViewChild, AfterViewChecked, OnInit } from '@angular/core';
+import { odontobotOpenSignal } from '../../services/odontobot.service';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -23,7 +24,7 @@ export class OdontobotComponent implements AfterViewChecked, OnInit {
 
   @ViewChild('scrollMe') private scrollContainer!: ElementRef;
 
-  open = signal(false);
+  open = odontobotOpenSignal;
   messages = signal<ChatMessage[]>([]);
   input = signal('');
   typing = signal(false);
@@ -44,10 +45,26 @@ export class OdontobotComponent implements AfterViewChecked, OnInit {
 
   toggle() {
     this.open.update(v => !v);
-
     if (this.open() && this.messages().length === 0) {
       this.startConversation();
     }
+  }
+
+  ngOnInit() {
+    effect(() => {
+      if (!this.auth.user()) {
+        this.messages.set([]);
+        this.input.set('');
+        this.open.set(false);
+      }
+      // Si alguien dispara odontobotOpenSignal a true, abrir el chat
+      if (odontobotOpenSignal()) {
+        if (!this.open()) {
+          this.open.set(true);
+          if (this.messages().length === 0) this.startConversation();
+        }
+      }
+    });
   }
 
   startConversation() {
@@ -88,15 +105,7 @@ export class OdontobotComponent implements AfterViewChecked, OnInit {
     this.handleUserInput(value);
   }
 
-  ngOnInit() {
-    effect(() => {
-      if (!this.auth.user()) {
-        this.messages.set([]);
-        this.input.set('');
-        this.open.set(false);
-      }
-    });
-  }
+
 
   handleOption(option: string) {
     this.messages.update(msgs => [

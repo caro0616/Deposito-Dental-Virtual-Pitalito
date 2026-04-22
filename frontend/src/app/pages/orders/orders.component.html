@@ -11,10 +11,15 @@
     </div>
   }
 
-  @for (order of orders(); track order.id) {
+  @for (order of paginatedOrders; track order.id) {
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button (click)="setPage(page - 1)" [disabled]="page === 1">Anterior</button>
+        <span>Página {{ page }} de {{ totalPages }}</span>
+        <button (click)="setPage(page + 1)" [disabled]="page === totalPages">Siguiente</button>
+      </div>
     <div class="order-card">
       <div class="order-header">
-        <span><strong>ID de pedido:</strong> {{ order.id.slice(0, 12) }}</span>
+        <span><strong>ID de pedido:</strong> {{ order.id.slice(0, 8) }}</span>
         <span><strong>Fecha:</strong> {{ order.createdAt ? (order.createdAt | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
         <span 
           class="status"

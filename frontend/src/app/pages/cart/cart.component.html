@@ -101,10 +101,10 @@
       </div>
     } @else {
       <div class="orders-list">
-        @for (order of previousOrders(); track order.id) {
+        @for (order of paginatedOrders; track order.id) {
           <div class="order-card">
             <div class="order-card__header">
-              <span class="order-card__id">Orden #{{ order.id.slice(-8) }}</span>
+              <span class="order-card__id">ID: {{ order.id.slice(0, 8) }}</span>
               <span class="order-card__status" [style.background]="getStatusColor(order.status)">
                 {{ getStatusLabel(order.status) }}
               </span>
@@ -122,6 +122,11 @@
             </div>
           </div>
         }
+      </div>
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button (click)="setPage(page() - 1)" [disabled]="page() === 1">Anterior</button>
+        <span>Página {{ page() }} de {{ totalPages }}</span>
+        <button (click)="setPage(page() + 1)" [disabled]="page() === totalPages">Siguiente</button>
       </div>
     }
   </section>
