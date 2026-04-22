@@ -47,7 +47,7 @@
                     @for (notif of notifications(); track notif._id) {
                       <div class="notif-item" [class.notif-item--read]="notif.read">
                         @if (notif.url && notif._id === 'denti-bot') {
-                          <a href="#" (click)="notificationService.markAsRead(notif._id); $event.preventDefault()">
+                          <a href="#" (click)="openOdontoBotFromNotif(notif._id, $event)">
                             {{ notif.title }}<br><small>{{ notif.message }}</small>
                           </a>
                         } @else {

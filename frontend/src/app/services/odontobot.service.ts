@@ -1,4 +1,6 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+// Señal global para abrir OdontoBot desde cualquier parte
+export const odontobotOpenSignal = signal(false);
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 

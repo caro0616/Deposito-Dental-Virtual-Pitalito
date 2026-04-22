@@ -26,6 +26,29 @@ export class CartComponent implements OnInit {
   checkingOut    = signal(false);
   checkoutError  = signal('');
 
+  // Paginación
+  page = signal(1);
+  pageSize = 5;
+
+  get paginatedOrders() {
+    // Ordenar por fecha descendente (más reciente primero)
+    const sorted = [...this.previousOrders()].sort((a, b) => {
+      const da = new Date(a.createdAt ?? a.statusHistory?.[0]?.changedAt ?? 0).getTime();
+      const db = new Date(b.createdAt ?? b.statusHistory?.[0]?.changedAt ?? 0).getTime();
+      return db - da;
+    });
+    const start = (this.page() - 1) * this.pageSize;
+    return sorted.slice(start, start + this.pageSize);
+  }
+
+  get totalPages() {
+    return Math.ceil(this.previousOrders().length / this.pageSize);
+  }
+
+  setPage(p: number) {
+    if (p >= 1 && p <= this.totalPages) this.page.set(p);
+  }
+
   async ngOnInit() {
     if (this.authService.isLoggedIn()) {
       await this.cartService.loadCart();

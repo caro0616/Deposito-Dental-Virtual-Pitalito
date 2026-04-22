@@ -1,3 +1,4 @@
+import { odontobotOpenSignal } from '../../services/odontobot.service';
 import { NotificationService } from '../../services/notification.service';
 import { Component, signal, HostListener, inject, OnInit } from '@angular/core';
 import { ApplicationRef } from '@angular/core';
@@ -18,6 +19,12 @@ import { filter } from 'rxjs/operators';
 })
 
 export class NavbarComponent implements OnInit {
+  openOdontoBotFromNotif(id: string, event: Event) {
+    event.preventDefault();
+    this.notificationService.markAsRead(id);
+    this.notificationsOpen.set(false);
+    odontobotOpenSignal.set(true);
+  }
   appRef = inject(ApplicationRef);
   notificationService = inject(NotificationService);
   cartService = inject(CartService);
