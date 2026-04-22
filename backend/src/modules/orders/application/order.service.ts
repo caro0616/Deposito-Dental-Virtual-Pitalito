@@ -7,6 +7,8 @@ import {
   forwardRef,
   Inject as NestInject,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { ICartRepository, CART_REPOSITORY } from '../infrastructure/cart.repository';
 import { Order, OrderStatus, OrderCheckoutDetails } from '../domain/order.entity';
 import { IOrderRepository, ORDER_REPOSITORY } from '../infrastructure/order.repository';
@@ -17,6 +19,8 @@ import {
 import { randomUUID } from 'crypto';
 import { MailService } from '../../../shared/mail.service';
 import { UserService } from '../../users/application/user.service';
+import { CounterDoc, CounterDocument } from '../infrastructure/persistence/schemas/counter.schema';
+import { OrderDoc, OrderDocument } from '../infrastructure/persistence/schemas/order.schema';
 
 @Injectable()
 export class OrderService {
@@ -33,6 +37,10 @@ export class OrderService {
     private readonly mailService: MailService,
     @NestInject(forwardRef(() => UserService))
     private readonly userService: UserService,
+    @InjectModel(CounterDoc.name)
+    private readonly counterModel: Model<CounterDocument>,
+    @InjectModel(OrderDoc.name)
+    private readonly orderModel: Model<OrderDocument>,
   ) {}
 
   async checkout(userId: string, checkoutDetails: OrderCheckoutDetails): Promise<Order> {
@@ -53,13 +61,7 @@ export class OrderService {
       throw new BadRequestException(`Stock insuficiente para: ${outOfStock.join(', ')}`);
     }
 
-    // Obtener el último orderNumber y sumar 1
-    let lastOrderNumber = 0;
-    const allOrders = await this.orderRepository.findAll();
-    if (allOrders.length > 0) {
-      lastOrderNumber = Math.max(...allOrders.map((o) => o.orderNumber || 0));
-    }
-    const newOrderNumber = lastOrderNumber + 1;
+    const newOrderNumber = await this.nextOrderNumber();
 
     const order = new Order(
       randomUUID(),
@@ -90,6 +92,27 @@ export class OrderService {
     }
 
     await this.orderRepository.save(order);
+
+    try {
+      const user = await this.userService.findById(userId);
+      const recipient = user?.email || checkoutDetails.customer.email;
+      if (recipient) {
+        await this.mailService.sendOrderConfirmation(recipient, {
+          orderNumber: order.orderNumber ?? 0,
+          customerName: checkoutDetails.customer.fullName || user?.name || 'Cliente',
+          total: order.total,
+          items: order.items.map((item) => ({
+            name: item.name,
+            quantity: item.quantity,
+            subtotal: item.subtotal,
+          })),
+          createdAt: order.createdAt || new Date(),
+        });
+      }
+    } catch (e) {
+      this.logger.warn(`No se pudo enviar correo de confirmación para pedido #${order.orderNumber}`);
+      this.logger.error('Detalle del error de correo de confirmación', e);
+    }
 
     cart.items = [];
     cart.total = 0;
@@ -167,5 +190,48 @@ export class OrderService {
 
     // ✅ GUARDAR AL FINAL
     await this.cartRepository.save(cart);
+  }
+
+  private async nextOrderNumber(): Promise<number> {
+    await this.syncCounterWithExistingOrders();
+
+    const counter = await this.counterModel
+      .findOneAndUpdate(
+        { key: 'orderNumber' },
+        { $inc: { seq: 1 } },
+        { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true },
+      )
+      .lean<{ seq?: number }>()
+      .exec();
+
+    if (!counter?.seq || counter.seq < 1) {
+      throw new BadRequestException('No se pudo generar el número de pedido');
+    }
+
+    return counter.seq;
+  }
+
+  /**
+   * Si existen órdenes antiguas creadas antes del contador, eleva el contador
+   * al máximo orderNumber persistido para evitar duplicados.
+   */
+  private async syncCounterWithExistingOrders(): Promise<void> {
+    const latestOrder = await this.orderModel
+      .findOne({ orderNumber: { $exists: true } })
+      .sort({ orderNumber: -1 })
+      .select({ orderNumber: 1, _id: 0 })
+      .lean<{ orderNumber?: number }>()
+      .exec();
+
+    const maxExistingOrderNumber = latestOrder?.orderNumber ?? 0;
+
+    await this.counterModel.findOneAndUpdate(
+      { key: 'orderNumber' },
+      {
+        $max: { seq: maxExistingOrderNumber },
+        $setOnInsert: { key: 'orderNumber' },
+      },
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true },
+    );
   }
 }

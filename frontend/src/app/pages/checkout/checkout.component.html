@@ -13,6 +13,12 @@
       <div class="checkout-success-modal__content">
         <h2>¡Pago exitoso!</h2>
         <p>Tu pedido ha sido registrado correctamente.</p>
+        @if (confirmedOrder()?.orderNumber) {
+          <p><strong>Pedido #{{ confirmedOrder()?.orderNumber }}</strong></p>
+        }
+        @if (confirmedOrder()?.checkoutDetails?.customer?.email) {
+          <p>Enviamos la confirmación a {{ confirmedOrder()?.checkoutDetails?.customer?.email }}.</p>
+        }
       </div>
     </div>
   }
