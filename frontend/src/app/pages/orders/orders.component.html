@@ -41,13 +41,6 @@
   }
 
   @for (order of paginatedOrders; track order.id) {
-      @if (totalPages > 1) {
-        <div class="pagination">
-          <button (click)="setPage(page - 1)" [disabled]="page === 1">Anterior</button>
-          <span>Página {{ page }} de {{ totalPages }}</span>
-          <button (click)="setPage(page + 1)" [disabled]="page === totalPages">Siguiente</button>
-        </div>
-      }
     <div class="order-card">
       <div class="order-main">
         <div class="order-info">
@@ -72,12 +65,6 @@
         </div>
 
         <span class="status" [style.background]="getStatusColor(order.status)">
-      <div class="order-header">
-        <span><strong>ID de pedido:</strong> {{ order.id.slice(0, 8) }}</span>
-        <span><strong>Fecha:</strong> {{ order.createdAt ? (order.createdAt | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
-        <span 
-          class="status"
-          [style.background]="getStatusColor(order.status)">
           {{ getStatusLabel(order.status) }}
         </span>
       </div>
@@ -100,6 +87,14 @@
           </button>
         </div>
       </div>
+    </div>
+  }
+
+  @if (totalPages > 1) {
+    <div class="pagination">
+      <button (click)="setPage(page - 1)" [disabled]="page === 1">Anterior</button>
+      <span>Página {{ page }} de {{ totalPages }}</span>
+      <button (click)="setPage(page + 1)" [disabled]="page === totalPages">Siguiente</button>
     </div>
   }
 </div>

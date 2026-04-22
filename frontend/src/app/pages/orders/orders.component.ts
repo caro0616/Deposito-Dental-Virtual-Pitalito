@@ -45,10 +45,6 @@ export class OrdersComponent implements OnInit {
     if (p >= 1 && p <= this.totalPages) this.page = p;
   }
 
-  isLast<T>(items: T[], item: T): boolean {
-    return items[items.length - 1] === item;
-  }
-
   ngOnInit(): void {
     this.orderService.loadMyOrders();
   }
@@ -69,8 +65,6 @@ export class OrdersComponent implements OnInit {
     } finally {
       this.reorderingOrderId = null;
     }
-    await this.orderService.reorder(orderId);
-    await this.cartService.loadCart();
   }
 
   getStatusLabel(status: string) {
