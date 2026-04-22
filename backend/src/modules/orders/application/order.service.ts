@@ -123,7 +123,9 @@ export class OrderService {
         await this.mailService.sendOrderStatusUpdate(user.email, subject, text);
       }
     } catch (e) {
-      this.logger.error('No se pudo enviar el correo', e);
+      this.logger.warn(
+        `No se pudo enviar correo de confirmación para pedido #${order.orderNumber}`,
+      );
     }
 
     return order;
