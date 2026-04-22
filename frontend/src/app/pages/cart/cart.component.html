@@ -123,11 +123,13 @@
           </div>
         }
       </div>
-      <div class="pagination" *ngIf="totalPages > 1">
-        <button (click)="setPage(page() - 1)" [disabled]="page() === 1">Anterior</button>
-        <span>Página {{ page() }} de {{ totalPages }}</span>
-        <button (click)="setPage(page() + 1)" [disabled]="page() === totalPages">Siguiente</button>
-      </div>
+      @if (totalPages > 1) {
+        <div class="pagination">
+          <button (click)="setPage(page() - 1)" [disabled]="page() === 1">Anterior</button>
+          <span>Página {{ page() }} de {{ totalPages }}</span>
+          <button (click)="setPage(page() + 1)" [disabled]="page() === totalPages">Siguiente</button>
+        </div>
+      }
     }
   </section>
 
