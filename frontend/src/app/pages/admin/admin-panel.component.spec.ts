@@ -177,4 +177,58 @@ describe('AdminPanelComponent', () => {
     expect(component.allOrders()[0]?.status).toBe('shipped');
     expect(component.statusSavingId()).toBeNull();
   });
+
+  it('ngOnInit does not load data when user is not admin', () => {
+    spyOn(component.auth, 'isAdmin').and.returnValue(false);
+    spyOn(component, 'loadInventory').and.resolveTo();
+    spyOn(component, 'loadOrders').and.resolveTo();
+
+    component.ngOnInit();
+
+    expect(component.loadInventory).not.toHaveBeenCalled();
+    expect(component.loadOrders).not.toHaveBeenCalled();
+  });
+
+  it('publishNews sets error when service fails', async () => {
+    notificationService.createNews.and.rejectWith(new Error('fail'));
+    component.newsTitle = 'Nueva noticia';
+    component.newsContent = 'Contenido';
+
+    await component.publishNews();
+
+    expect(component.newsSuccess()).toBeFalse();
+    expect(component.newsError()).toContain('No se pudo publicar');
+  });
+
+  it('loadInventory and saveStock set inventoryError on failures', async () => {
+    productService.getAdminInventory.and.rejectWith(new Error('fail'));
+    await component.loadInventory();
+    expect(component.inventoryError()).toContain('No se pudo cargar');
+
+    productService.updateAdminStock.and.rejectWith(new Error('fail'));
+    component.setStockDraft('p1', 1.9);
+    component.setStockDraft('p2', -10);
+    expect(component.stockDraft('p1')).toBe(1);
+    expect(component.stockDraft('p2')).toBe(0);
+
+    await component.saveStock('p1');
+    expect(component.inventoryError()).toContain('No se pudo actualizar el stock');
+  });
+
+  it('loadOrders and saveOrderStatus set ordersError on failures', async () => {
+    orderService.loadAllOrders.and.rejectWith(new Error('fail'));
+    await component.loadOrders();
+    expect(component.ordersError()).toContain('No se pudieron cargar');
+
+    orderService.updateStatus.and.rejectWith(new Error('fail'));
+    component.setStatusDraft('o1', 'paid');
+    await component.saveOrderStatus('o1');
+    expect(component.ordersError()).toContain('No se pudo actualizar el estado');
+  });
+
+  it('statusDraft and formatDate return fallback values', () => {
+    expect(component.statusDraft('missing')).toBe('pending');
+    expect(component.formatDate(undefined)).toBe('—');
+    expect(component.formatDate('invalid-date')).toBe('—');
+  });
 });

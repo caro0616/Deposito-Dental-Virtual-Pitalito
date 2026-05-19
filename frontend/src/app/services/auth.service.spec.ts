@@ -138,4 +138,47 @@ describe('AuthService', () => {
     const expiredService = TestBed.inject(AuthService);
     expect(expiredService.getToken()).toBeNull();
   });
+
+  it('private decodeToken returns null for malformed tokens', () => {
+    const decodedShort = (service as never as { decodeToken: (t: string) => unknown }).decodeToken(
+      'abc.def',
+    );
+    expect(decodedShort).toBeNull();
+
+    const decodedInvalid = (
+      service as never as { decodeToken: (t: string) => unknown }
+    ).decodeToken('abc.def.ghi');
+    expect(decodedInvalid).toBeNull();
+  });
+
+  it('private handleAuthResponse throws when token payload is invalid', () => {
+    const call = () =>
+      (
+        service as never as {
+          handleAuthResponse: (res: { token: string }) => void;
+        }
+      ).handleAuthResponse({ token: 'invalid.token.structure' });
+
+    expect(call).toThrow();
+  });
+
+  it('private restoreSession keeps valid token active', () => {
+    const token = createToken({
+      sub: 'u-valid',
+      email: 'valid@test.com',
+      role: 'customer',
+      provider: 'local',
+      exp: Math.floor(Date.now() / 1000) + 3600,
+    });
+    localStorage.setItem('auth_token', token);
+
+    (
+      service as never as {
+        restoreSession: () => void;
+      }
+    ).restoreSession();
+
+    expect(service.getToken()).toBe(token);
+    expect(service.userId()).toBe('u-valid');
+  });
 });
