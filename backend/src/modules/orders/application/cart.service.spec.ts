@@ -90,7 +90,9 @@ describe('CartService', () => {
     cartRepository.findByUserId.mockResolvedValue(null);
 
     await expect(service.removeItem('u1', 'i1')).rejects.toBeInstanceOf(NotFoundException);
-    await expect(service.updateItemQuantity('u1', 'i1', 2)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.updateItemQuantity('u1', 'i1', 2)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('updateItemQuantity validates quantity and updates cart', async () => {

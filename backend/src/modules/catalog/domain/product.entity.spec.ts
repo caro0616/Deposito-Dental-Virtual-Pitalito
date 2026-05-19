@@ -23,6 +23,8 @@ describe('Product entity', () => {
     expect(product.stock).toBe(3);
 
     expect(() => product.decreaseStock(0)).toThrow('Quantity must be positive');
-    expect(() => product.decreaseStock(99)).toThrow('Insufficient stock: available 3, requested 99');
+    expect(() => product.decreaseStock(99)).toThrow(
+      'Insufficient stock: available 3, requested 99',
+    );
   });
 });

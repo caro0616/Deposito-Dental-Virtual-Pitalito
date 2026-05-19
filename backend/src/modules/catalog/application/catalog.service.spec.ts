@@ -15,16 +15,7 @@ describe('CatalogService', () => {
     true,
   );
 
-  const inactiveProduct = new Product(
-    'p2',
-    'Guantes',
-    'Nitrilo',
-    50,
-    '',
-    'proteccion',
-    0,
-    false,
-  );
+  const inactiveProduct = new Product('p2', 'Guantes', 'Nitrilo', 50, '', 'proteccion', 0, false);
 
   function createRepoMock(): jest.Mocked<IProductRepository> {
     return {
@@ -125,7 +116,10 @@ describe('CatalogService', () => {
     const pOut = new Product('C', 'Producto sin stock', '', 80, '', 'materiales', 0, true);
 
     jest
-      .spyOn(service as unknown as { extractTextFromAttachment: (f: unknown) => Promise<string> }, 'extractTextFromAttachment')
+      .spyOn(
+        service as unknown as { extractTextFromAttachment: (f: unknown) => Promise<string> },
+        'extractTextFromAttachment',
+      )
       .mockResolvedValue('resina adhesivo resina');
 
     repo.search.mockImplementation(async (token: string) => {
