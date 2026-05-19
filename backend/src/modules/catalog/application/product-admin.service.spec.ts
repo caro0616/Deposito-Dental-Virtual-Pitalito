@@ -56,7 +56,9 @@ describe('ProductAdminService', () => {
     const service = new ProductAdminService(repo);
     repo.findById.mockResolvedValue(null);
 
-    await expect(service.update('missing', { name: 'X' })).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.update('missing', { name: 'X' })).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('update mutates fields and saves', async () => {

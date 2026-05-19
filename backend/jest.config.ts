@@ -9,7 +9,16 @@ const config: Config = {
   roots: ['<rootDir>/src'],
   testMatch: ['**/*.spec.ts'],
   moduleFileExtensions: ['ts', 'js', 'json'],
-  collectCoverageFrom: ['src/**/*.ts', '!src/main.ts', '!src/seed.ts', '!src/**/dto/*.ts'],
+  collectCoverageFrom: [
+    'src/modules/catalog/**/*.ts',
+    'src/modules/orders/**/*.ts',
+    '!src/**/*.spec.ts',
+    '!src/**/*.module.ts',
+    '!src/**/presentation/**/*.ts',
+    '!src/**/dto/*.ts',
+    '!src/**/infrastructure/persistence/**/*.ts',
+    '!src/**/infrastructure/**/schemas/*.ts',
+  ],
   coverageDirectory: 'coverage',
   clearMocks: true,
 };

@@ -5,8 +5,12 @@ describe('InMemoryProductRepository', () => {
   it('search matches semantic tokens and category hints', async () => {
     const repo = new InMemoryProductRepository();
 
-    await repo.save(new Product('p1', 'Resina Z350', 'Resina de restauracion', 100, '', 'materiales', 10, true));
-    await repo.save(new Product('p2', 'Guantes Nitrilo', 'Proteccion clinica', 50, '', 'proteccion', 12, true));
+    await repo.save(
+      new Product('p1', 'Resina Z350', 'Resina de restauracion', 100, '', 'materiales', 10, true),
+    );
+    await repo.save(
+      new Product('p2', 'Guantes Nitrilo', 'Proteccion clinica', 50, '', 'proteccion', 12, true),
+    );
     await repo.save(new Product('p3', 'Turbina Pro', 'Equipo dental', 500, '', 'equipos', 3, true));
 
     const materiales = await repo.search('necesito materiales para resina');

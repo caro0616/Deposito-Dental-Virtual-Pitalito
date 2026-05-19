@@ -111,26 +111,35 @@ describe('OrderService', () => {
     const { service, cartRepository } = createOrderServiceDeps();
     cartRepository.findByUserId.mockResolvedValue(new Cart('c1', 'u1', [], 0));
 
-    await expect(service.checkout('u1', checkoutDetails)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.checkout('u1', checkoutDetails)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
   });
 
   it('checkout throws when any product has insufficient stock', async () => {
     const { service, cartRepository, productRepository } = createOrderServiceDeps();
-    const cart = new Cart('c1', 'u1', [
-      {
-        id: 'i1',
-        productId: 'p1',
-        name: 'Resina',
-        unitPrice: 10,
-        quantity: 3,
-        subtotal: 30,
-      },
-    ], 30);
+    const cart = new Cart(
+      'c1',
+      'u1',
+      [
+        {
+          id: 'i1',
+          productId: 'p1',
+          name: 'Resina',
+          unitPrice: 10,
+          quantity: 3,
+          subtotal: 30,
+        },
+      ],
+      30,
+    );
 
     cartRepository.findByUserId.mockResolvedValue(cart);
     productRepository.findById.mockResolvedValue({ stock: 1 } as never);
 
-    await expect(service.checkout('u1', checkoutDetails)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.checkout('u1', checkoutDetails)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
   });
 
   it('checkout saves order, decreases stock and clears cart', async () => {
@@ -143,16 +152,21 @@ describe('OrderService', () => {
       userService,
     } = createOrderServiceDeps();
 
-    const cart = new Cart('c1', 'u1', [
-      {
-        id: 'i1',
-        productId: 'p1',
-        name: 'Resina',
-        unitPrice: 20,
-        quantity: 2,
-        subtotal: 40,
-      },
-    ], 40);
+    const cart = new Cart(
+      'c1',
+      'u1',
+      [
+        {
+          id: 'i1',
+          productId: 'p1',
+          name: 'Resina',
+          unitPrice: 20,
+          quantity: 2,
+          subtotal: 40,
+        },
+      ],
+      40,
+    );
 
     cartRepository.findByUserId.mockResolvedValue(cart);
     productRepository.findById.mockResolvedValue({ stock: 10 } as never);
@@ -173,11 +187,14 @@ describe('OrderService', () => {
     const { service, orderRepository } = createOrderServiceDeps();
     orderRepository.findById.mockResolvedValue(null);
 
-    await expect(service.updateStatus('o1', 'paid', 'admin')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.updateStatus('o1', 'paid', 'admin')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('reorder adds available items and reports skipped items', async () => {
-    const { service, orderRepository, cartRepository, productRepository } = createOrderServiceDeps();
+    const { service, orderRepository, cartRepository, productRepository } =
+      createOrderServiceDeps();
 
     orderRepository.findById.mockResolvedValue({
       id: 'o1',
