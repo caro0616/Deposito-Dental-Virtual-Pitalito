@@ -22,9 +22,18 @@ export class InMemoryProductRepository implements IProductRepository {
   private readonly products = new Map<string, Product>();
   private readonly categoryHints: Array<{ slug: string; terms: string[] }> = [
     { slug: 'instrumental', terms: ['instrumental', 'pinza', 'espejo', 'explorador', 'fresa'] },
-    { slug: 'materiales', terms: ['material', 'materiales', 'resina', 'adhesivo', 'cemento', 'ionomero', 'composite'] },
-    { slug: 'consumibles', terms: ['consumible', 'consumibles', 'endodoncia', 'gutta', 'sellador', 'canal'] },
-    { slug: 'proteccion', terms: ['proteccion', 'bioseguridad', 'nitrilo', 'guante', 'tapabocas', 'mascarilla'] },
+    {
+      slug: 'materiales',
+      terms: ['material', 'materiales', 'resina', 'adhesivo', 'cemento', 'ionomero', 'composite'],
+    },
+    {
+      slug: 'consumibles',
+      terms: ['consumible', 'consumibles', 'endodoncia', 'gutta', 'sellador', 'canal'],
+    },
+    {
+      slug: 'proteccion',
+      terms: ['proteccion', 'bioseguridad', 'nitrilo', 'guante', 'tapabocas', 'mascarilla'],
+    },
     { slug: 'equipos', terms: ['equipo', 'equipos', 'turbina', 'micromotor', 'cavitron'] },
   ];
 
@@ -55,7 +64,9 @@ export class InMemoryProductRepository implements IProductRepository {
       .filter((p) => p.active && (!category || String(p.category) === category))
       .map((p) => {
         const haystack = this.normalize(
-          [p.name, p.description, p.sku, p.brand, p.materials, p.invima, String(p.category)].join(' '),
+          [p.name, p.description, p.sku, p.brand, p.materials, p.invima, String(p.category)].join(
+            ' ',
+          ),
         );
         const name = this.normalize(p.name);
         let score = 0;

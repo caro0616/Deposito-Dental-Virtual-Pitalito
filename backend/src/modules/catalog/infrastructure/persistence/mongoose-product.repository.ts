@@ -13,9 +13,18 @@ import { ProductDoc, ProductDocument } from './schemas/product.schema';
 export class MongooseProductRepository implements IProductRepository {
   private readonly categoryHints: Array<{ slug: string; terms: string[] }> = [
     { slug: 'instrumental', terms: ['instrumental', 'pinza', 'espejo', 'explorador', 'fresa'] },
-    { slug: 'materiales', terms: ['material', 'materiales', 'resina', 'adhesivo', 'cemento', 'ionomero', 'composite'] },
-    { slug: 'consumibles', terms: ['consumible', 'consumibles', 'endodoncia', 'gutta', 'sellador', 'canal'] },
-    { slug: 'proteccion', terms: ['proteccion', 'bioseguridad', 'nitrilo', 'guante', 'tapabocas', 'mascarilla'] },
+    {
+      slug: 'materiales',
+      terms: ['material', 'materiales', 'resina', 'adhesivo', 'cemento', 'ionomero', 'composite'],
+    },
+    {
+      slug: 'consumibles',
+      terms: ['consumible', 'consumibles', 'endodoncia', 'gutta', 'sellador', 'canal'],
+    },
+    {
+      slug: 'proteccion',
+      terms: ['proteccion', 'bioseguridad', 'nitrilo', 'guante', 'tapabocas', 'mascarilla'],
+    },
     { slug: 'equipos', terms: ['equipo', 'equipos', 'turbina', 'micromotor', 'cavitron'] },
   ];
 

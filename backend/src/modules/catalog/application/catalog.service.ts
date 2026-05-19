@@ -132,10 +132,9 @@ export class CatalogService {
     const mime = file.mimetype || '';
     if (mime === 'application/pdf') {
       const pdfParseModule = await import('pdf-parse');
-      const parser = (
-        (pdfParseModule as unknown as { default?: (buffer: Buffer) => Promise<{ text?: string }> }).default ??
-        (pdfParseModule as unknown as (buffer: Buffer) => Promise<{ text?: string }>)
-      );
+      const parser =
+        (pdfParseModule as unknown as { default?: (buffer: Buffer) => Promise<{ text?: string }> })
+          .default ?? (pdfParseModule as unknown as (buffer: Buffer) => Promise<{ text?: string }>);
       const parsed = await parser(file.buffer);
       return parsed?.text ?? '';
     }
