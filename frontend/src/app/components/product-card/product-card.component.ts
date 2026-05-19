@@ -42,6 +42,7 @@ export class ProductCardComponent {
   async addToCart(e: MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
+    if (this.product.stock <= 0) return;
     if (this.auth.isLoggedIn()) {
       await this.cartService.add(this.product.id);
     }

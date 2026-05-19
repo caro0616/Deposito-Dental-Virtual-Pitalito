@@ -20,6 +20,13 @@ export interface IProductRepository {
 
 export class InMemoryProductRepository implements IProductRepository {
   private readonly products = new Map<string, Product>();
+  private readonly categoryHints: Array<{ slug: string; terms: string[] }> = [
+    { slug: 'instrumental', terms: ['instrumental', 'pinza', 'espejo', 'explorador', 'fresa'] },
+    { slug: 'materiales', terms: ['material', 'materiales', 'resina', 'adhesivo', 'cemento', 'ionomero', 'composite'] },
+    { slug: 'consumibles', terms: ['consumible', 'consumibles', 'endodoncia', 'gutta', 'sellador', 'canal'] },
+    { slug: 'proteccion', terms: ['proteccion', 'bioseguridad', 'nitrilo', 'guante', 'tapabocas', 'mascarilla'] },
+    { slug: 'equipos', terms: ['equipo', 'equipos', 'turbina', 'micromotor', 'cavitron'] },
+  ];
 
   async findAll(): Promise<Product[]> {
     return Array.from(this.products.values());
@@ -38,15 +45,50 @@ export class InMemoryProductRepository implements IProductRepository {
   }
 
   async search(query: string): Promise<Product[]> {
-    const lower = query.toLowerCase();
-    return Array.from(this.products.values()).filter(
-      (p) =>
-        p.active &&
-        (p.name.toLowerCase().includes(lower) ||
-          p.description.toLowerCase().includes(lower) ||
-          p.sku.toLowerCase().includes(lower) ||
-          p.brand.toLowerCase().includes(lower)),
-    );
+    const normalized = this.normalize(query);
+    if (!normalized) return this.findActive();
+
+    const tokens = normalized.split(/\s+/).filter(Boolean);
+    const category = this.detectCategory(normalized);
+
+    return Array.from(this.products.values())
+      .filter((p) => p.active && (!category || String(p.category) === category))
+      .map((p) => {
+        const haystack = this.normalize(
+          [p.name, p.description, p.sku, p.brand, p.materials, p.invima, String(p.category)].join(' '),
+        );
+        const name = this.normalize(p.name);
+        let score = 0;
+
+        for (const token of tokens) {
+          if (haystack.includes(token)) score += 2;
+          if (name.includes(token)) score += 2;
+        }
+
+        if (category && String(p.category) === category) score += 2;
+        return { product: p, score };
+      })
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map((x) => x.product);
+  }
+
+  private normalize(value: string): string {
+    return value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/anestecia/g, 'anestesia')
+      .trim();
+  }
+
+  private detectCategory(query: string): string | null {
+    for (const hint of this.categoryHints) {
+      if (hint.terms.some((term) => query.includes(term))) {
+        return hint.slug;
+      }
+    }
+    return null;
   }
 
   async countByCategories(): Promise<Record<string, number>> {

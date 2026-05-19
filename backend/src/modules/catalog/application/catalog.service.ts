@@ -1,10 +1,17 @@
-import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject, BadRequestException } from '@nestjs/common';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { Product } from '../domain/product.entity';
 import { Category, DENTAL_CATEGORIES } from '../domain/categories';
 import { PRODUCT_REPOSITORY, IProductRepository } from '../infrastructure/product.repository';
 
 export interface CategoryWithCount extends Category {
   productCount: number;
+}
+
+interface UploadedAttachment {
+  buffer: Buffer;
+  mimetype: string;
 }
 
 @Injectable()
@@ -78,5 +85,84 @@ export class CatalogService {
       ...cat,
       productCount: counts[cat.slug] ?? 0,
     }));
+  }
+
+  /** Búsqueda asistida a partir de texto extraído de PDF/imagen */
+  async searchFromAttachment(file: UploadedAttachment): Promise<Product[]> {
+    if (!file?.buffer || file.buffer.length === 0) {
+      throw new BadRequestException('Archivo vacío o no válido.');
+    }
+
+    const text = await this.extractTextFromAttachment(file);
+    const normalized = this.normalizeText(text);
+    if (!normalized) return [];
+
+    const tokens = Array.from(
+      new Set(
+        normalized
+          .split(/\s+/)
+          .filter((t) => t.length >= 3)
+          .slice(0, 50),
+      ),
+    );
+
+    const scored = new Map<string, { product: Product; score: number }>();
+
+    for (const token of tokens) {
+      const matches = await this.productRepo.search(token);
+      for (const product of matches.slice(0, 12)) {
+        if (!product.isAvailable()) continue;
+        const current = scored.get(product.id);
+        const tokenScore = token.length >= 6 ? 2 : 1;
+        if (!current) {
+          scored.set(product.id, { product, score: tokenScore });
+        } else {
+          current.score += tokenScore;
+        }
+      }
+    }
+
+    return Array.from(scored.values())
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map((entry) => entry.product);
+  }
+
+  private async extractTextFromAttachment(file: UploadedAttachment): Promise<string> {
+    const mime = file.mimetype || '';
+    if (mime === 'application/pdf') {
+      const pdfParseModule = await import('pdf-parse');
+      const parser = (
+        (pdfParseModule as unknown as { default?: (buffer: Buffer) => Promise<{ text?: string }> }).default ??
+        (pdfParseModule as unknown as (buffer: Buffer) => Promise<{ text?: string }>)
+      );
+      const parsed = await parser(file.buffer);
+      return parsed?.text ?? '';
+    }
+
+    if (mime === 'image/png' || mime === 'image/jpeg') {
+      const tesseract = await import('tesseract.js');
+      const worker = await tesseract.createWorker('spa+eng', 1, {
+        cachePath: join(tmpdir(), 'deposito-dental-tesseract-cache'),
+      });
+      try {
+        const { data } = await worker.recognize(file.buffer);
+        return data?.text ?? '';
+      } finally {
+        await worker.terminate();
+      }
+    }
+
+    throw new BadRequestException('Tipo de archivo no soportado. Usa PNG, JPG/JPEG o PDF.');
+  }
+
+  private normalizeText(value: string): string {
+    return value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 }

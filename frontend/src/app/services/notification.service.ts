@@ -1,5 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 export interface Notification {
   _id: string;
@@ -30,6 +31,24 @@ export class NotificationService {
       }
       this.notifications.set(list.map(n => ({ ...n, read: false })));
     });
+  }
+
+  async createNews(title: string, message: string, url?: string): Promise<Notification> {
+    const created = await firstValueFrom(
+      this.http.post<Notification>('/api/notifications', {
+        title,
+        message,
+        url,
+        createdAt: new Date().toISOString(),
+      })
+    );
+
+    this.notifications.update((list) => [
+      { ...created, read: false },
+      ...list,
+    ]);
+
+    return created;
   }
 
   markAsRead(id: string) {

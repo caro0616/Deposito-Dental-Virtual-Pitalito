@@ -11,6 +11,14 @@ import { ProductDoc, ProductDocument } from './schemas/product.schema';
  */
 @Injectable()
 export class MongooseProductRepository implements IProductRepository {
+  private readonly categoryHints: Array<{ slug: string; terms: string[] }> = [
+    { slug: 'instrumental', terms: ['instrumental', 'pinza', 'espejo', 'explorador', 'fresa'] },
+    { slug: 'materiales', terms: ['material', 'materiales', 'resina', 'adhesivo', 'cemento', 'ionomero', 'composite'] },
+    { slug: 'consumibles', terms: ['consumible', 'consumibles', 'endodoncia', 'gutta', 'sellador', 'canal'] },
+    { slug: 'proteccion', terms: ['proteccion', 'bioseguridad', 'nitrilo', 'guante', 'tapabocas', 'mascarilla'] },
+    { slug: 'equipos', terms: ['equipo', 'equipos', 'turbina', 'micromotor', 'cavitron'] },
+  ];
+
   constructor(
     @InjectModel(ProductDoc.name)
     private readonly productModel: Model<ProductDocument>,
@@ -54,16 +62,52 @@ export class MongooseProductRepository implements IProductRepository {
   }
 
   /**
-   * US-03: búsqueda de texto completo por nombre, descripción, SKU o marca.
-   * Usa el índice de texto creado en el schema.
+   * US-03: búsqueda por lenguaje natural sobre inventario real.
+   * Prioriza coincidencias por nombre, descripción, marca, SKU, materiales,
+   * categoría e INVIMA y soporta términos parciales/sin acentos.
    */
   async search(query: string): Promise<Product[]> {
+    const normalized = this.normalizeText(query);
+    if (!normalized) return this.findActive();
+
+    const tokens = normalized.split(/\s+/).filter(Boolean);
+    const category = this.detectCategory(normalized);
+
     const docs = await this.productModel
-      .find({ $text: { $search: query }, active: true }, { score: { $meta: 'textScore' } })
-      .sort({ score: { $meta: 'textScore' } })
+      .find({ active: true, ...(category ? { category } : {}) })
       .lean<Array<ProductDoc & { _id: Types.ObjectId }>>()
       .exec();
-    return docs.map((doc) => this.toDomain(doc));
+
+    const scored = docs
+      .map((doc) => {
+        const product = this.toDomain(doc);
+        const haystack = this.normalizeText(
+          [
+            product.name,
+            product.description,
+            product.sku,
+            product.brand,
+            product.materials,
+            product.invima,
+            String(product.category),
+          ].join(' '),
+        );
+
+        const name = this.normalizeText(product.name);
+        let score = 0;
+
+        for (const token of tokens) {
+          if (haystack.includes(token)) score += 2;
+          if (name.includes(token)) score += 2;
+        }
+
+        if (category && String(product.category) === category) score += 2;
+        return { product, score };
+      })
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    return scored.map((x) => x.product);
   }
 
   async countByCategories(): Promise<Record<string, number>> {
@@ -142,5 +186,23 @@ export class MongooseProductRepository implements IProductRepository {
       doc.materials ?? '',
       doc.dimensions ?? '',
     );
+  }
+
+  private normalizeText(value: string): string {
+    return value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/anestecia/g, 'anestesia')
+      .trim();
+  }
+
+  private detectCategory(query: string): string | null {
+    for (const hint of this.categoryHints) {
+      if (hint.terms.some((term) => query.includes(term))) {
+        return hint.slug;
+      }
+    }
+    return null;
   }
 }

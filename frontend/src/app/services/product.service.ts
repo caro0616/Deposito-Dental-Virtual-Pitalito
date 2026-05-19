@@ -86,6 +86,33 @@ export class ProductService {
     );
   }
 
+  async getAdminInventory(): Promise<Product[]> {
+    const products = await firstValueFrom(
+      this.http.get<Product[]>(`${environment.apiUrl}/admin/products`, {
+        headers: { 'x-admin-id': 'admin' }
+      })
+    );
+    return products.map(p => ({ ...p, isFavorite: this._favorites().has(p.id) }));
+  }
+
+  async updateAdminStock(productId: string, stock: number): Promise<Product> {
+    const updated = await firstValueFrom(
+      this.http.patch<Product>(`${environment.apiUrl}/admin/products/${productId}/stock`, { stock }, {
+        headers: { 'x-admin-id': 'admin' }
+      })
+    );
+    return { ...updated, isFavorite: this._favorites().has(updated.id) };
+  }
+
+  async analyzeAttachment(file: File): Promise<Product[]> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const products = await firstValueFrom(
+      this.http.post<Product[]>(`${this.api}/analyze-file`, formData)
+    );
+    return products.map(p => ({ ...p, isFavorite: this._favorites().has(p.id) }));
+  }
+
   // ── Sync / cached access ───────────────────────────────
   getAll(): Product[] {
     if (!this._loaded) {

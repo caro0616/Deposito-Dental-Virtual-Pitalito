@@ -71,7 +71,38 @@
 
 .odontobot-header-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
+}
+
+.odontobot-attach-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: rgba(0, 0, 0, 0.08);
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.9);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
 }
 
 .odontobot-header-btn {
@@ -209,6 +240,12 @@
   padding: 8px 12px;
   font-size: 13px;
   border-top: 1px solid #e5e7eb;
+}
+
+.file-preview--error {
+  background: #fff1f2;
+  border-top: 1px solid #fecdd3;
+  color: #be123c;
 }
 
 /* INPUT */

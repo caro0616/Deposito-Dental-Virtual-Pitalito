@@ -1,5 +1,20 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { CatalogService } from '../application/catalog.service';
+
+interface UploadedAttachment {
+  buffer: Buffer;
+  mimetype: string;
+}
 
 @Controller('products')
 export class CatalogController {
@@ -50,5 +65,27 @@ export class CatalogController {
   @Get(':id')
   async getProduct(@Param('id') id: string) {
     return this.catalogService.getProductById(id);
+  }
+
+  /** Analiza un PDF o imagen para recomendar productos del inventario */
+  @Post('analyze-file')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 8 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) => {
+        const allowed = ['application/pdf', 'image/png', 'image/jpeg'];
+        if (!allowed.includes(file.mimetype)) {
+          cb(new Error('Tipo de archivo no permitido'), false);
+          return;
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async analyzeFile(@UploadedFile() file?: UploadedAttachment) {
+    if (!file) {
+      throw new BadRequestException('Debes adjuntar un archivo PNG, JPG/JPEG o PDF.');
+    }
+    return this.catalogService.searchFromAttachment(file);
   }
 }

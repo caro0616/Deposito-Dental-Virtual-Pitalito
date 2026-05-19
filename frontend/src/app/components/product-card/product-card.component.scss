@@ -232,3 +232,27 @@
     z-index: 11 !important;
   }
 }
+
+.product-card--out-of-stock {
+  filter: grayscale(0.65);
+
+  &:hover {
+    transform: none;
+    box-shadow: 0 4px 24px 0 rgba(26, 41, 64, 0.10);
+  }
+
+  .product-card__img-wrap img {
+    opacity: 0.8;
+  }
+
+  .product-card__cart-btn {
+    background: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+
+    &:hover {
+      background: #94a3b8;
+      transform: none;
+    }
+  }
+}
